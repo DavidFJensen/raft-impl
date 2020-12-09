@@ -27,14 +27,10 @@ import (
 	"time"
 )
 
+const DEBUG = 1
+
 // import "bytes"
 // import "encoding/gob"
-
-var (
-	WarningLogger *log.Logger
-	InfoLogger    *log.Logger
-	ErrorLogger   *log.Logger
-)
 
 const (
 	RaftElectionTimeoutMin = 500 * time.Millisecond
@@ -65,13 +61,13 @@ func (le *LogEntry) equal(le1 *LogEntry) bool {
 
 func getRandElectionTimeout() time.Duration {
 	ret := RaftElectionTimeoutMin + (time.Duration(rand.Int63()) % RaftElectionTimeoutMin)
-	fmt.Printf("Get new electionTimeout: %v\n", ret)
+	// fmt.Printf("Get new electionTimeout: %v\n", ret)
 	return ret
 }
 
 func getRandAppendEntryTimeout() time.Duration {
 	ret := RaftAppendEntryTimeout + 2*(time.Duration(rand.Int63())%RaftAppendEntryTimeout)
-	fmt.Printf("Get init appendEntryTimeout: %v\n", ret)
+	// fmt.Printf("Get init appendEntryTimeout: %v\n", ret)
 	return ret
 }
 
@@ -88,6 +84,22 @@ func (mu *RaftMutex) Lock() {
 func (mu *RaftMutex) Unlock() {
 	// mu.rf.logger.Println("{Unlock}")
 	mu.mu.Unlock()
+}
+
+type RaftLogger struct {
+	logger *log.Logger
+}
+
+func (rl *RaftLogger) Println(v ...interface{}) {
+	if DEBUG == 1 {
+		rl.logger.Println(v...)
+	}
+}
+
+func (rl *RaftLogger) Printf(format string, v ...interface{}) {
+	if DEBUG == 1 {
+		rl.logger.Printf(format, v...)
+	}
 }
 
 //
@@ -123,7 +135,7 @@ type Raft struct {
 	matchIndex []int // [FOR LEADER] for each peer, index of highest log entry known to be replicated
 
 	// helper
-	logger *log.Logger
+	logger *RaftLogger
 }
 
 // return currentTerm and whether this server
@@ -326,10 +338,20 @@ func (rf *Raft) sendAppendEntries(server int, args AppendEntriesArgs, reply *App
 // the leader.
 //
 func (rf *Raft) Start(command interface{}) (int, int, bool) {
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
 	index := -1
-	term := -1
-	isLeader := true
-
+	term := rf.currentTerm
+	isLeader := rf.state == 2
+	if !isLeader {
+		return index, term, isLeader
+	}
+	rf.logger.Printf("Start agreement on command: %v [%T]", command, command)
+	index = len(rf.logs)
+	applyMsg := ApplyMsg{}
+	applyMsg.Index = index
+	applyMsg.Command = command
+	rf.applyCh <- applyMsg
 	return index, term, isLeader
 }
 
@@ -393,6 +415,17 @@ func waitTimeout(wg sync.WaitGroup, timeout time.Duration) bool {
 	}
 }
 
+func (rf *Raft) sendMessageEntry(msg ApplyMsg) {
+	rf.mu.Lock()
+	rf.logger.Printf("after applying, begin deliver message")
+	if rf.state != 2 {
+		rf.mu.Unlock()
+		return
+	}
+	//TODO:
+	rf.mu.Unlock()
+}
+
 func (rf *Raft) sendHeartBeat() {
 	rf.mu.Lock()
 	if rf.state != 2 {
@@ -418,7 +451,7 @@ func (rf *Raft) sendHeartBeat() {
 			}
 			args.LeaderCommit = rf.commitIndex
 			var reply AppendEntriesReply
-			rf.logger.Printf("send heart beat to peer %v", i)
+			// rf.logger.Printf("send heart beat to peer %v", i)
 			rf.sendAppendEntries(i, args, &reply)
 		}(i, rf)
 	}
@@ -435,6 +468,10 @@ func (rf *Raft) becomeFollower() {
 func (rf *Raft) becomeLeader() {
 	rf.logger.Println("become a leader.")
 	rf.state = 2
+	for i := range rf.nextIndex {
+		rf.nextIndex[i] = len(rf.logs)
+		rf.matchIndex[i] = 0
+	}
 	//TODO:
 }
 
@@ -457,7 +494,9 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	rf.mu.rf = rf
 	rf.me = me
 	prefix := fmt.Sprintf("[peer %v] ", rf.me)
-	rf.logger = log.New(os.Stdout, prefix, log.Ldate|log.Lmicroseconds|log.Lshortfile)
+	logger := log.New(os.Stdout, prefix, log.Ldate|log.Lmicroseconds|log.Lshortfile)
+	rf.logger = &RaftLogger{}
+	rf.logger.logger = logger
 	rf.peers = peers
 	rf.persister = persister
 
@@ -472,6 +511,8 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	rf.appendEntryTimeout = time.NewTimer(getRandAppendEntryTimeout())
 	rf.electionTimeout = time.NewTimer(getRandElectionTimeout())
 	rf.heartBeatTimer = time.NewTimer(RaftHeartBeatLoop)
+	rf.nextIndex = make([]int, len(peers))
+	rf.matchIndex = make([]int, len(peers))
 
 	// initialize from state persisted before a crash
 	rf.readPersist(persister.ReadRaftState())
@@ -493,7 +534,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 			}
 			// In candidate state
 			if rf.state == 1 {
-				rf.logger.Printf("voteNum: %v, line: %v", rf.voteNum, len(rf.peers)/2)
+				// rf.logger.Printf("voteNum: %v, line: %v", rf.voteNum, len(rf.peers)/2)
 				if rf.voteNum >= len(rf.peers)/2 {
 					rf.mu.Lock()
 					if rf.state == 1 {
@@ -518,6 +559,18 @@ func Make(peers []*labrpc.ClientEnd, me int,
 				case <-rf.killCh:
 					return
 				}
+			}
+		}
+	}(rf)
+
+	go func(rf *Raft) {
+		rf.logger.Println("Start goroutine for listening apply message.")
+		for {
+			select {
+			case msg := <-rf.applyCh:
+				rf.sendMessageEntry(msg)
+			case <-rf.killCh:
+				return
 			}
 		}
 	}(rf)
