@@ -48,14 +48,19 @@ package labrpc
 //   pass svc to srv.AddService()
 //
 
-import "encoding/gob"
-import "bytes"
-import "reflect"
-import "sync"
-import "log"
-import "strings"
-import "math/rand"
-import "time"
+import (
+	"bytes"
+	"encoding/gob"
+	// "fmt"
+	"log"
+	"math/rand"
+	"reflect"
+	"strings"
+	"sync"
+	"time"
+)
+
+//DEBUG
 
 type reqMsg struct {
 	endname  interface{} // name of sending ClientEnd
@@ -79,6 +84,7 @@ type ClientEnd struct {
 // the return value indicates success; false means the
 // server couldn't be contacted.
 func (e *ClientEnd) Call(svcMeth string, args interface{}, reply interface{}) bool {
+	// fmt.Printf("When calling, args: %v\n", args)
 	req := reqMsg{}
 	req.endname = e.endname
 	req.svcMeth = svcMeth
@@ -89,6 +95,7 @@ func (e *ClientEnd) Call(svcMeth string, args interface{}, reply interface{}) bo
 	qe := gob.NewEncoder(qb)
 	qe.Encode(args)
 	req.args = qb.Bytes()
+	// fmt.Printf("Encoded args: %v\n", req.args)
 
 	e.ch <- req
 
@@ -185,6 +192,8 @@ func (rn *Network) IsServerDead(endname interface{}, servername interface{}, ser
 
 func (rn *Network) ProcessReq(req reqMsg) {
 	enabled, servername, server, reliable, longreordering := rn.ReadEndnameInfo(req.endname)
+	// fmt.Printf("Before processing request, servername: %v, reliable: %v, enabled: %v, longreordering: %v\n",
+		// servername, reliable, enabled, longreordering)
 
 	if enabled && servername != nil && server != nil {
 		if reliable == false {
@@ -427,9 +436,11 @@ func (svc *Service) dispatch(methname string, req reqMsg) replyMsg {
 		args := reflect.New(req.argsType)
 
 		// decode the argument.
+		// fmt.Printf("In dispatch, before decoding, encoded args: %v\n", req.args)
 		ab := bytes.NewBuffer(req.args)
 		ad := gob.NewDecoder(ab)
 		ad.Decode(args.Interface())
+		// fmt.Printf("After decoding, args.Elem(): %v, args.Interface(): %v\n", args.Elem(), args.Interface())
 
 		// allocate space for the reply.
 		replyType := method.Type.In(2)
