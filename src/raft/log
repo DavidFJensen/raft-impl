@@ -1,0 +1,662 @@
+[peer 0] 2020/12/10 19:18:28.440921 raft.go:95: Start goroutine for listening follower.
+[peer 1] 2020/12/10 19:18:28.441104 raft.go:95: Start goroutine for listening follower.
+[peer 2] 2020/12/10 19:18:28.441130 raft.go:95: Start goroutine for listening follower.
+Test: basic agreement ...
+nCommitted: checking whether some have committed before Start(), index: 1
+reading cfg.logs ... expected index: 1
+cfg.logs[0]: map[]
+cfg.logs[0][1] - cmd1: 0, ok: false
+cfg.logs[1]: map[]
+cfg.logs[1][1] - cmd1: 0, ok: false
+cfg.logs[2]: map[]
+cfg.logs[2][1] - cmd1: 0, ok: false
+cfg.logs[3]: map[]
+cfg.logs[3][1] - cmd1: 0, ok: false
+cfg.logs[4]: map[]
+cfg.logs[4][1] - cmd1: 0, ok: false
+[peer 3] 2020/12/10 19:18:28.441212 raft.go:95: Start goroutine for listening follower.
+[peer 4] 2020/12/10 19:18:28.441227 raft.go:95: Start goroutine for listening follower.
+[peer 0] 2020/12/10 19:18:28.678193 raft.go:95: append entry timeout!
+[peer 0] 2020/12/10 19:18:28.678290 raft.go:95: start election.
+[peer 0] 2020/12/10 19:18:28.678311 raft.go:95: become a candidate.
+[peer 0] 2020/12/10 19:18:28.679819 raft.go:95: become a leader.
+[peer 1] 2020/12/10 19:18:28.680398 raft.go:101: Checking whether to apply. commitIndex: -1, lastApplied: -1
+[peer 4] 2020/12/10 19:18:28.680427 raft.go:101: Checking whether to apply. commitIndex: -1, lastApplied: -1
+[peer 4] 2020/12/10 19:18:28.680481 raft.go:101: rf.commitIndex: -1
+[peer 0] 2020/12/10 19:18:28.680770 raft.go:101: rf.commitIndex: -1
+[peer 3] 2020/12/10 19:18:28.680787 raft.go:101: Checking whether to apply. commitIndex: -1, lastApplied: -1
+[peer 3] 2020/12/10 19:18:28.680815 raft.go:101: rf.commitIndex: -1
+[peer 0] 2020/12/10 19:18:28.681029 raft.go:101: rf.commitIndex: -1
+[peer 1] 2020/12/10 19:18:28.680437 raft.go:101: rf.commitIndex: -1
+[peer 2] 2020/12/10 19:18:28.681124 raft.go:101: Checking whether to apply. commitIndex: -1, lastApplied: -1
+[peer 2] 2020/12/10 19:18:28.681156 raft.go:101: rf.commitIndex: -1
+[peer 0] 2020/12/10 19:18:28.681236 raft.go:101: rf.commitIndex: -1
+[peer 0] 2020/12/10 19:18:28.681328 raft.go:101: rf.commitIndex: -1
+[peer 0] 2020/12/10 19:18:28.692479 raft.go:101: Start agreement on command: 100 [int]
+[peer 0] 2020/12/10 19:18:28.692656 raft.go:101: I am the leader. I append the new command, now logs: [{1 100}]
+Oh, Start() has returned index 1, let's check it!
+reading cfg.logs ... expected index: 1
+cfg.logs[0]: map[]
+cfg.logs[0][1] - cmd1: 0, ok: false
+cfg.logs[1]: map[]
+cfg.logs[1][1] - cmd1: 0, ok: false
+cfg.logs[2]: map[]
+cfg.logs[2][1] - cmd1: 0, ok: false
+cfg.logs[3]: map[]
+cfg.logs[3][1] - cmd1: 0, ok: false
+cfg.logs[4]: map[]
+cfg.logs[4][1] - cmd1: 0, ok: false
+[peer 0] 2020/12/10 19:18:28.692808 raft.go:101: Sending new entries to peer 1, entries: [{1 100}], leaderCommit: -1
+[peer 0] 2020/12/10 19:18:28.693006 raft.go:101: nextIndex[1]: 0, lastLogIndex: 0
+[peer 0] 2020/12/10 19:18:28.693006 raft.go:101: Sending new entries to peer 3, entries: [{1 100}], leaderCommit: -1
+[peer 0] 2020/12/10 19:18:28.693074 raft.go:101: nextIndex[3]: 0, lastLogIndex: 0
+[peer 3] 2020/12/10 19:18:28.693471 raft.go:101: Checking whether to apply. commitIndex: -1, lastApplied: -1
+[peer 3] 2020/12/10 19:18:28.693513 raft.go:101: Receive append entries [{1 100}] from peer 0 in term 1, receiver's term is 1.
+[peer 3] 2020/12/10 19:18:28.693537 raft.go:101: before updating, args.PrevLogIndex: -1	len(rf.logs): 0	logs: []
+[peer 3] 2020/12/10 19:18:28.693559 raft.go:101: k: 0, upperbound: 1
+[peer 3] 2020/12/10 19:18:28.693582 raft.go:101: k: 0, upperbound: 1
+[peer 3] 2020/12/10 19:18:28.693607 raft.go:101: after updating, logs: [{1 100}]
+[peer 3] 2020/12/10 19:18:28.693628 raft.go:101: rf.commitIndex: -1
+[peer 0] 2020/12/10 19:18:28.692899 raft.go:101: Sending new entries to peer 2, entries: [{1 100}], leaderCommit: -1
+[peer 0] 2020/12/10 19:18:28.693899 raft.go:101: nextIndex[2]: 0, lastLogIndex: 0
+[peer 2] 2020/12/10 19:18:28.694242 raft.go:101: Checking whether to apply. commitIndex: -1, lastApplied: -1
+[peer 2] 2020/12/10 19:18:28.694277 raft.go:101: Receive append entries [{1 100}] from peer 0 in term 1, receiver's term is 1.
+[peer 2] 2020/12/10 19:18:28.694321 raft.go:101: before updating, args.PrevLogIndex: -1	len(rf.logs): 0	logs: []
+[peer 2] 2020/12/10 19:18:28.694343 raft.go:101: k: 0, upperbound: 1
+[peer 2] 2020/12/10 19:18:28.694375 raft.go:101: k: 0, upperbound: 1
+[peer 2] 2020/12/10 19:18:28.694400 raft.go:101: after updating, logs: [{1 100}]
+[peer 2] 2020/12/10 19:18:28.694422 raft.go:101: rf.commitIndex: -1
+[peer 1] 2020/12/10 19:18:28.693477 raft.go:101: Checking whether to apply. commitIndex: -1, lastApplied: -1
+[peer 1] 2020/12/10 19:18:28.694631 raft.go:101: Receive append entries [{1 100}] from peer 0 in term 1, receiver's term is 1.
+[peer 1] 2020/12/10 19:18:28.694654 raft.go:101: before updating, args.PrevLogIndex: -1	len(rf.logs): 0	logs: []
+[peer 1] 2020/12/10 19:18:28.694674 raft.go:101: k: 0, upperbound: 1
+[peer 1] 2020/12/10 19:18:28.694694 raft.go:101: k: 0, upperbound: 1
+[peer 1] 2020/12/10 19:18:28.694717 raft.go:101: after updating, logs: [{1 100}]
+[peer 1] 2020/12/10 19:18:28.694739 raft.go:101: rf.commitIndex: -1
+[peer 0] 2020/12/10 19:18:28.692951 raft.go:101: Sending new entries to peer 4, entries: [{1 100}], leaderCommit: -1
+[peer 0] 2020/12/10 19:18:28.694960 raft.go:101: nextIndex[4]: 0, lastLogIndex: 0
+[peer 4] 2020/12/10 19:18:28.695267 raft.go:101: Checking whether to apply. commitIndex: -1, lastApplied: -1
+[peer 4] 2020/12/10 19:18:28.695300 raft.go:101: Receive append entries [{1 100}] from peer 0 in term 1, receiver's term is 1.
+[peer 4] 2020/12/10 19:18:28.695321 raft.go:101: before updating, args.PrevLogIndex: -1	len(rf.logs): 0	logs: []
+[peer 4] 2020/12/10 19:18:28.695341 raft.go:101: k: 0, upperbound: 1
+[peer 4] 2020/12/10 19:18:28.695361 raft.go:101: k: 0, upperbound: 1
+[peer 4] 2020/12/10 19:18:28.695384 raft.go:101: after updating, logs: [{1 100}]
+[peer 4] 2020/12/10 19:18:28.695413 raft.go:101: rf.commitIndex: -1
+[peer 0] 2020/12/10 19:18:28.693870 raft.go:101: Before updating nextindex, nextindex: 0
+[peer 0] 2020/12/10 19:18:28.695597 raft.go:101: Suceess. nextindex: 1
+[peer 0] 2020/12/10 19:18:28.695616 raft.go:101: rf.commitIndex: 0
+[peer 0] 2020/12/10 19:18:28.695637 raft.go:101: Before updating nextindex, nextindex: 0
+[peer 0] 2020/12/10 19:18:28.695655 raft.go:101: Suceess. nextindex: 1
+[peer 0] 2020/12/10 19:18:28.695672 raft.go:101: rf.commitIndex: 0
+[peer 0] 2020/12/10 19:18:28.695690 raft.go:101: Before updating nextindex, nextindex: 0
+[peer 0] 2020/12/10 19:18:28.695710 raft.go:101: Suceess. nextindex: 1
+[peer 0] 2020/12/10 19:18:28.695728 raft.go:101: rf.commitIndex: 0
+[peer 0] 2020/12/10 19:18:28.695746 raft.go:101: Before updating nextindex, nextindex: 0
+[peer 0] 2020/12/10 19:18:28.695763 raft.go:101: Suceess. nextindex: 1
+[peer 0] 2020/12/10 19:18:28.695783 raft.go:101: rf.commitIndex: 0
+reading cfg.logs ... expected index: 1
+cfg.logs[0]: map[1:100]
+cfg.logs[0][1] - cmd1: 100, ok: true
+cfg.logs[1]: map[]
+cfg.logs[1][1] - cmd1: 0, ok: false
+cfg.logs[2]: map[]
+cfg.logs[2][1] - cmd1: 0, ok: false
+cfg.logs[3]: map[]
+cfg.logs[3][1] - cmd1: 0, ok: false
+cfg.logs[4]: map[]
+cfg.logs[4][1] - cmd1: 0, ok: false
+reading cfg.logs ... expected index: 1
+cfg.logs[0]: map[1:100]
+cfg.logs[0][1] - cmd1: 100, ok: true
+cfg.logs[1]: map[]
+cfg.logs[1][1] - cmd1: 0, ok: false
+cfg.logs[2]: map[]
+cfg.logs[2][1] - cmd1: 0, ok: false
+cfg.logs[3]: map[]
+cfg.logs[3][1] - cmd1: 0, ok: false
+cfg.logs[4]: map[]
+cfg.logs[4][1] - cmd1: 0, ok: false
+reading cfg.logs ... expected index: 1
+cfg.logs[0]: map[1:100]
+cfg.logs[0][1] - cmd1: 100, ok: true
+cfg.logs[1]: map[]
+cfg.logs[1][1] - cmd1: 0, ok: false
+cfg.logs[2]: map[]
+cfg.logs[2][1] - cmd1: 0, ok: false
+cfg.logs[3]: map[]
+cfg.logs[3][1] - cmd1: 0, ok: false
+cfg.logs[4]: map[]
+cfg.logs[4][1] - cmd1: 0, ok: false
+reading cfg.logs ... expected index: 1
+cfg.logs[0]: map[1:100]
+cfg.logs[0][1] - cmd1: 100, ok: true
+cfg.logs[1]: map[]
+cfg.logs[1][1] - cmd1: 0, ok: false
+cfg.logs[2]: map[]
+cfg.logs[2][1] - cmd1: 0, ok: false
+cfg.logs[3]: map[]
+cfg.logs[3][1] - cmd1: 0, ok: false
+cfg.logs[4]: map[]
+cfg.logs[4][1] - cmd1: 0, ok: false
+[peer 1] 2020/12/10 19:18:28.780322 raft.go:101: Checking whether to apply. commitIndex: -1, lastApplied: -1
+[peer 1] 2020/12/10 19:18:28.780375 raft.go:101: rf.commitIndex: 0
+[peer 4] 2020/12/10 19:18:28.780410 raft.go:101: Checking whether to apply. commitIndex: -1, lastApplied: -1
+[peer 3] 2020/12/10 19:18:28.780347 raft.go:101: Checking whether to apply. commitIndex: -1, lastApplied: -1
+[peer 3] 2020/12/10 19:18:28.780476 raft.go:101: rf.commitIndex: 0
+[peer 0] 2020/12/10 19:18:28.780498 raft.go:101: rf.commitIndex: 0
+[peer 4] 2020/12/10 19:18:28.780439 raft.go:101: rf.commitIndex: 0
+[peer 2] 2020/12/10 19:18:28.780377 raft.go:101: Checking whether to apply. commitIndex: -1, lastApplied: -1
+[peer 2] 2020/12/10 19:18:28.780555 raft.go:101: rf.commitIndex: 0
+[peer 0] 2020/12/10 19:18:28.780597 raft.go:101: rf.commitIndex: 0
+[peer 0] 2020/12/10 19:18:28.780617 raft.go:101: rf.commitIndex: 0
+[peer 0] 2020/12/10 19:18:28.780662 raft.go:101: rf.commitIndex: 0
+reading cfg.logs ... expected index: 1
+cfg.logs[0]: map[1:100]
+cfg.logs[0][1] - cmd1: 100, ok: true
+cfg.logs[1]: map[]
+cfg.logs[1][1] - cmd1: 0, ok: false
+cfg.logs[2]: map[]
+cfg.logs[2][1] - cmd1: 0, ok: false
+cfg.logs[3]: map[]
+cfg.logs[3][1] - cmd1: 0, ok: false
+cfg.logs[4]: map[]
+cfg.logs[4][1] - cmd1: 0, ok: false
+reading cfg.logs ... expected index: 1
+cfg.logs[0]: map[1:100]
+cfg.logs[0][1] - cmd1: 100, ok: true
+cfg.logs[1]: map[]
+cfg.logs[1][1] - cmd1: 0, ok: false
+cfg.logs[2]: map[]
+cfg.logs[2][1] - cmd1: 0, ok: false
+cfg.logs[3]: map[]
+cfg.logs[3][1] - cmd1: 0, ok: false
+cfg.logs[4]: map[]
+cfg.logs[4][1] - cmd1: 0, ok: false
+reading cfg.logs ... expected index: 1
+cfg.logs[0]: map[1:100]
+cfg.logs[0][1] - cmd1: 100, ok: true
+cfg.logs[1]: map[]
+cfg.logs[1][1] - cmd1: 0, ok: false
+cfg.logs[2]: map[]
+cfg.logs[2][1] - cmd1: 0, ok: false
+cfg.logs[3]: map[]
+cfg.logs[3][1] - cmd1: 0, ok: false
+cfg.logs[4]: map[]
+cfg.logs[4][1] - cmd1: 0, ok: false
+reading cfg.logs ... expected index: 1
+cfg.logs[0]: map[1:100]
+cfg.logs[0][1] - cmd1: 100, ok: true
+cfg.logs[1]: map[]
+cfg.logs[1][1] - cmd1: 0, ok: false
+cfg.logs[2]: map[]
+cfg.logs[2][1] - cmd1: 0, ok: false
+cfg.logs[3]: map[]
+cfg.logs[3][1] - cmd1: 0, ok: false
+cfg.logs[4]: map[]
+cfg.logs[4][1] - cmd1: 0, ok: false
+reading cfg.logs ... expected index: 1
+cfg.logs[0]: map[1:100]
+cfg.logs[0][1] - cmd1: 100, ok: true
+cfg.logs[1]: map[]
+cfg.logs[1][1] - cmd1: 0, ok: false
+cfg.logs[2]: map[]
+cfg.logs[2][1] - cmd1: 0, ok: false
+cfg.logs[3]: map[]
+cfg.logs[3][1] - cmd1: 0, ok: false
+cfg.logs[4]: map[]
+cfg.logs[4][1] - cmd1: 0, ok: false
+[peer 1] 2020/12/10 19:18:28.880759 raft.go:101: Checking whether to apply. commitIndex: 0, lastApplied: -1
+[peer 1] 2020/12/10 19:18:28.880842 raft.go:101: Apply message with index 1 and command 100!
+[peer 1] 2020/12/10 19:18:28.880868 raft.go:101: rf.commitIndex: 0
+[peer 4] 2020/12/10 19:18:28.880908 raft.go:101: Checking whether to apply. commitIndex: 0, lastApplied: -1
+[peer 3] 2020/12/10 19:18:28.880801 raft.go:101: Checking whether to apply. commitIndex: 0, lastApplied: -1
+[peer 0] 2020/12/10 19:18:28.881095 raft.go:101: rf.commitIndex: 0
+[peer 3] 2020/12/10 19:18:28.881102 raft.go:101: Apply message with index 1 and command 100!
+[peer 3] 2020/12/10 19:18:28.881140 raft.go:101: rf.commitIndex: 0
+[peer 4] 2020/12/10 19:18:28.881165 raft.go:101: Apply message with index 1 and command 100!
+[peer 4] 2020/12/10 19:18:28.881197 raft.go:101: rf.commitIndex: 0
+[peer 0] 2020/12/10 19:18:28.881335 raft.go:101: rf.commitIndex: 0
+[peer 2] 2020/12/10 19:18:28.880819 raft.go:101: Checking whether to apply. commitIndex: 0, lastApplied: -1
+[peer 2] 2020/12/10 19:18:28.881376 raft.go:101: Apply message with index 1 and command 100!
+[peer 2] 2020/12/10 19:18:28.881396 raft.go:101: rf.commitIndex: 0
+[peer 0] 2020/12/10 19:18:28.881404 raft.go:101: rf.commitIndex: 0
+[peer 0] 2020/12/10 19:18:28.881583 raft.go:101: rf.commitIndex: 0
+reading cfg.logs ... expected index: 1
+cfg.logs[0]: map[1:100]
+cfg.logs[0][1] - cmd1: 100, ok: true
+cfg.logs[1]: map[1:100]
+cfg.logs[1][1] - cmd1: 100, ok: true
+cfg.logs[2]: map[1:100]
+cfg.logs[2][1] - cmd1: 100, ok: true
+cfg.logs[3]: map[1:100]
+cfg.logs[3][1] - cmd1: 100, ok: true
+cfg.logs[4]: map[1:100]
+cfg.logs[4][1] - cmd1: 100, ok: true
+nCommitted: checking whether some have committed before Start(), index: 2
+reading cfg.logs ... expected index: 2
+cfg.logs[0]: map[1:100]
+cfg.logs[0][2] - cmd1: 0, ok: false
+cfg.logs[1]: map[1:100]
+cfg.logs[1][2] - cmd1: 0, ok: false
+cfg.logs[2]: map[1:100]
+cfg.logs[2][2] - cmd1: 0, ok: false
+cfg.logs[3]: map[1:100]
+cfg.logs[3][2] - cmd1: 0, ok: false
+cfg.logs[4]: map[1:100]
+cfg.logs[4][2] - cmd1: 0, ok: false
+[peer 0] 2020/12/10 19:18:28.897272 raft.go:101: Start agreement on command: 200 [int]
+[peer 0] 2020/12/10 19:18:28.897315 raft.go:101: I am the leader. I append the new command, now logs: [{1 100} {1 200}]
+Oh, Start() has returned index 2, let's check it!
+reading cfg.logs ... expected index: 2
+cfg.logs[0]: map[1:100]
+cfg.logs[0][2] - cmd1: 0, ok: false
+cfg.logs[1]: map[1:100]
+cfg.logs[1][2] - cmd1: 0, ok: false
+cfg.logs[2]: map[1:100]
+cfg.logs[2][2] - cmd1: 0, ok: false
+cfg.logs[3]: map[1:100]
+[peer 0] 2020/12/10 19:18:28.897457 raft.go:101: Sending new entries to peer 2, entries: [{1 200}], leaderCommit: 0
+cfg.logs[3][2] - cmd1: 0, ok: false
+[peer 0] 2020/12/10 19:18:28.897595 raft.go:101: nextIndex[2]: 1, lastLogIndex: 1
+cfg.logs[4]: map[1:100]
+cfg.logs[4][2] - cmd1: 0, ok: false
+[peer 0] 2020/12/10 19:18:28.897504 raft.go:101: Sending new entries to peer 4, entries: [{1 200}], leaderCommit: 0
+[peer 0] 2020/12/10 19:18:28.897942 raft.go:101: nextIndex[4]: 1, lastLogIndex: 1
+[peer 2] 2020/12/10 19:18:28.898249 raft.go:101: Checking whether to apply. commitIndex: 0, lastApplied: 0
+[peer 2] 2020/12/10 19:18:28.898291 raft.go:101: Receive append entries [{1 200}] from peer 0 in term 1, receiver's term is 1.
+[peer 2] 2020/12/10 19:18:28.898318 raft.go:101: before updating, args.PrevLogIndex: 0	len(rf.logs): 1	logs: [{1 100}]
+[peer 4] 2020/12/10 19:18:28.898340 raft.go:101: Checking whether to apply. commitIndex: 0, lastApplied: 0
+[peer 0] 2020/12/10 19:18:28.897516 raft.go:101: Sending new entries to peer 1, entries: [{1 200}], leaderCommit: 0
+[peer 4] 2020/12/10 19:18:28.898382 raft.go:101: Receive append entries [{1 200}] from peer 0 in term 1, receiver's term is 1.
+[peer 4] 2020/12/10 19:18:28.898411 raft.go:101: before updating, args.PrevLogIndex: 0	len(rf.logs): 1	logs: [{1 100}]
+[peer 4] 2020/12/10 19:18:28.898433 raft.go:101: k: 1, upperbound: 2
+[peer 4] 2020/12/10 19:18:28.898455 raft.go:101: k: 1, upperbound: 2
+[peer 4] 2020/12/10 19:18:28.898481 raft.go:101: after updating, logs: [{1 100} {1 200}]
+[peer 4] 2020/12/10 19:18:28.898510 raft.go:101: rf.commitIndex: 0
+[peer 2] 2020/12/10 19:18:28.898339 raft.go:101: k: 1, upperbound: 2
+[peer 2] 2020/12/10 19:18:28.898742 raft.go:101: k: 1, upperbound: 2
+[peer 2] 2020/12/10 19:18:28.898772 raft.go:101: after updating, logs: [{1 100} {1 200}]
+[peer 2] 2020/12/10 19:18:28.898794 raft.go:101: rf.commitIndex: 0
+[peer 0] 2020/12/10 19:18:28.898389 raft.go:101: nextIndex[1]: 1, lastLogIndex: 1
+[peer 1] 2020/12/10 19:18:28.899325 raft.go:101: Checking whether to apply. commitIndex: 0, lastApplied: 0
+[peer 1] 2020/12/10 19:18:28.899359 raft.go:101: Receive append entries [{1 200}] from peer 0 in term 1, receiver's term is 1.
+[peer 1] 2020/12/10 19:18:28.899383 raft.go:101: before updating, args.PrevLogIndex: 0	len(rf.logs): 1	logs: [{1 100}]
+[peer 1] 2020/12/10 19:18:28.899403 raft.go:101: k: 1, upperbound: 2
+[peer 1] 2020/12/10 19:18:28.899424 raft.go:101: k: 1, upperbound: 2
+[peer 1] 2020/12/10 19:18:28.899448 raft.go:101: after updating, logs: [{1 100} {1 200}]
+[peer 1] 2020/12/10 19:18:28.899469 raft.go:101: rf.commitIndex: 0
+[peer 0] 2020/12/10 19:18:28.897532 raft.go:101: Sending new entries to peer 3, entries: [{1 200}], leaderCommit: 0
+[peer 0] 2020/12/10 19:18:28.899706 raft.go:101: nextIndex[3]: 1, lastLogIndex: 1
+[peer 3] 2020/12/10 19:18:28.900023 raft.go:101: Checking whether to apply. commitIndex: 0, lastApplied: 0
+[peer 3] 2020/12/10 19:18:28.900065 raft.go:101: Receive append entries [{1 200}] from peer 0 in term 1, receiver's term is 1.
+[peer 3] 2020/12/10 19:18:28.900107 raft.go:101: before updating, args.PrevLogIndex: 0	len(rf.logs): 1	logs: [{1 100}]
+[peer 3] 2020/12/10 19:18:28.900128 raft.go:101: k: 1, upperbound: 2
+[peer 3] 2020/12/10 19:18:28.900149 raft.go:101: k: 1, upperbound: 2
+[peer 3] 2020/12/10 19:18:28.900173 raft.go:101: after updating, logs: [{1 100} {1 200}]
+[peer 3] 2020/12/10 19:18:28.900194 raft.go:101: rf.commitIndex: 0
+[peer 0] 2020/12/10 19:18:28.898721 raft.go:101: Before updating nextindex, nextindex: 1
+[peer 0] 2020/12/10 19:18:28.900400 raft.go:101: Suceess. nextindex: 2
+[peer 0] 2020/12/10 19:18:28.900420 raft.go:101: rf.commitIndex: 1
+[peer 0] 2020/12/10 19:18:28.900440 raft.go:101: Before updating nextindex, nextindex: 1
+[peer 0] 2020/12/10 19:18:28.900457 raft.go:101: Suceess. nextindex: 2
+[peer 0] 2020/12/10 19:18:28.900474 raft.go:101: rf.commitIndex: 1
+[peer 0] 2020/12/10 19:18:28.900493 raft.go:101: Before updating nextindex, nextindex: 1
+[peer 0] 2020/12/10 19:18:28.900510 raft.go:101: Suceess. nextindex: 2
+[peer 0] 2020/12/10 19:18:28.900527 raft.go:101: rf.commitIndex: 1
+[peer 0] 2020/12/10 19:18:28.900546 raft.go:101: Before updating nextindex, nextindex: 1
+[peer 0] 2020/12/10 19:18:28.900563 raft.go:101: Suceess. nextindex: 2
+[peer 0] 2020/12/10 19:18:28.900580 raft.go:101: rf.commitIndex: 1
+reading cfg.logs ... expected index: 2
+cfg.logs[0]: map[1:100 2:200]
+cfg.logs[0][2] - cmd1: 200, ok: true
+cfg.logs[1]: map[1:100]
+cfg.logs[1][2] - cmd1: 0, ok: false
+cfg.logs[2]: map[1:100]
+cfg.logs[2][2] - cmd1: 0, ok: false
+cfg.logs[3]: map[1:100]
+cfg.logs[3][2] - cmd1: 0, ok: false
+cfg.logs[4]: map[1:100]
+cfg.logs[4][2] - cmd1: 0, ok: false
+reading cfg.logs ... expected index: 2
+cfg.logs[0]: map[1:100 2:200]
+cfg.logs[0][2] - cmd1: 200, ok: true
+cfg.logs[1]: map[1:100]
+cfg.logs[1][2] - cmd1: 0, ok: false
+cfg.logs[2]: map[1:100]
+cfg.logs[2][2] - cmd1: 0, ok: false
+cfg.logs[3]: map[1:100]
+cfg.logs[3][2] - cmd1: 0, ok: false
+cfg.logs[4]: map[1:100]
+cfg.logs[4][2] - cmd1: 0, ok: false
+reading cfg.logs ... expected index: 2
+cfg.logs[0]: map[1:100 2:200]
+cfg.logs[0][2] - cmd1: 200, ok: true
+cfg.logs[1]: map[1:100]
+cfg.logs[1][2] - cmd1: 0, ok: false
+cfg.logs[2]: map[1:100]
+cfg.logs[2][2] - cmd1: 0, ok: false
+cfg.logs[3]: map[1:100]
+cfg.logs[3][2] - cmd1: 0, ok: false
+cfg.logs[4]: map[1:100]
+cfg.logs[4][2] - cmd1: 0, ok: false
+reading cfg.logs ... expected index: 2
+cfg.logs[0]: map[1:100 2:200]
+cfg.logs[0][2] - cmd1: 200, ok: true
+cfg.logs[1]: map[1:100]
+cfg.logs[1][2] - cmd1: 0, ok: false
+cfg.logs[2]: map[1:100]
+cfg.logs[2][2] - cmd1: 0, ok: false
+cfg.logs[3]: map[1:100]
+cfg.logs[3][2] - cmd1: 0, ok: false
+cfg.logs[4]: map[1:100]
+cfg.logs[4][2] - cmd1: 0, ok: false
+[peer 3] 2020/12/10 19:18:28.980772 raft.go:101: Checking whether to apply. commitIndex: 0, lastApplied: 0
+[peer 3] 2020/12/10 19:18:28.980810 raft.go:101: rf.commitIndex: 1
+[peer 0] 2020/12/10 19:18:28.980917 raft.go:101: rf.commitIndex: 1
+[peer 4] 2020/12/10 19:18:28.980977 raft.go:101: Checking whether to apply. commitIndex: 0, lastApplied: 0
+[peer 4] 2020/12/10 19:18:28.981013 raft.go:101: rf.commitIndex: 1
+[peer 2] 2020/12/10 19:18:28.981092 raft.go:101: Checking whether to apply. commitIndex: 0, lastApplied: 0
+[peer 2] 2020/12/10 19:18:28.981113 raft.go:101: rf.commitIndex: 1
+[peer 0] 2020/12/10 19:18:28.981118 raft.go:101: rf.commitIndex: 1
+[peer 0] 2020/12/10 19:18:28.981209 raft.go:101: rf.commitIndex: 1
+[peer 1] 2020/12/10 19:18:28.981351 raft.go:101: Checking whether to apply. commitIndex: 0, lastApplied: 0
+[peer 1] 2020/12/10 19:18:28.981372 raft.go:101: rf.commitIndex: 1
+[peer 0] 2020/12/10 19:18:28.981475 raft.go:101: rf.commitIndex: 1
+reading cfg.logs ... expected index: 2
+cfg.logs[0]: map[1:100 2:200]
+cfg.logs[0][2] - cmd1: 200, ok: true
+cfg.logs[1]: map[1:100]
+cfg.logs[1][2] - cmd1: 0, ok: false
+cfg.logs[2]: map[1:100]
+cfg.logs[2][2] - cmd1: 0, ok: false
+cfg.logs[3]: map[1:100]
+cfg.logs[3][2] - cmd1: 0, ok: false
+cfg.logs[4]: map[1:100]
+cfg.logs[4][2] - cmd1: 0, ok: false
+reading cfg.logs ... expected index: 2
+cfg.logs[0]: map[1:100 2:200]
+cfg.logs[0][2] - cmd1: 200, ok: true
+cfg.logs[1]: map[1:100]
+cfg.logs[1][2] - cmd1: 0, ok: false
+cfg.logs[2]: map[1:100]
+cfg.logs[2][2] - cmd1: 0, ok: false
+cfg.logs[3]: map[1:100]
+cfg.logs[3][2] - cmd1: 0, ok: false
+cfg.logs[4]: map[1:100]
+cfg.logs[4][2] - cmd1: 0, ok: false
+reading cfg.logs ... expected index: 2
+cfg.logs[0]: map[1:100 2:200]
+cfg.logs[0][2] - cmd1: 200, ok: true
+cfg.logs[1]: map[1:100]
+cfg.logs[1][2] - cmd1: 0, ok: false
+cfg.logs[2]: map[1:100]
+cfg.logs[2][2] - cmd1: 0, ok: false
+cfg.logs[3]: map[1:100]
+cfg.logs[3][2] - cmd1: 0, ok: false
+cfg.logs[4]: map[1:100]
+cfg.logs[4][2] - cmd1: 0, ok: false
+reading cfg.logs ... expected index: 2
+cfg.logs[0]: map[1:100 2:200]
+cfg.logs[0][2] - cmd1: 200, ok: true
+cfg.logs[1]: map[1:100]
+cfg.logs[1][2] - cmd1: 0, ok: false
+cfg.logs[2]: map[1:100]
+cfg.logs[2][2] - cmd1: 0, ok: false
+cfg.logs[3]: map[1:100]
+cfg.logs[3][2] - cmd1: 0, ok: false
+cfg.logs[4]: map[1:100]
+cfg.logs[4][2] - cmd1: 0, ok: false
+reading cfg.logs ... expected index: 2
+cfg.logs[0]: map[1:100 2:200]
+cfg.logs[0][2] - cmd1: 200, ok: true
+cfg.logs[1]: map[1:100]
+cfg.logs[1][2] - cmd1: 0, ok: false
+cfg.logs[2]: map[1:100]
+cfg.logs[2][2] - cmd1: 0, ok: false
+cfg.logs[3]: map[1:100]
+cfg.logs[3][2] - cmd1: 0, ok: false
+cfg.logs[4]: map[1:100]
+cfg.logs[4][2] - cmd1: 0, ok: false
+[peer 2] 2020/12/10 19:18:29.081102 raft.go:101: Checking whether to apply. commitIndex: 1, lastApplied: 0
+[peer 2] 2020/12/10 19:18:29.081160 raft.go:101: Apply message with index 2 and command 200!
+[peer 2] 2020/12/10 19:18:29.081184 raft.go:101: rf.commitIndex: 1
+[peer 0] 2020/12/10 19:18:29.081373 raft.go:101: rf.commitIndex: 1
+[peer 4] 2020/12/10 19:18:29.081445 raft.go:101: Checking whether to apply. commitIndex: 1, lastApplied: 0
+[peer 4] 2020/12/10 19:18:29.081494 raft.go:101: Apply message with index 2 and command 200!
+[peer 4] 2020/12/10 19:18:29.081516 raft.go:101: rf.commitIndex: 1
+[peer 3] 2020/12/10 19:18:29.081132 raft.go:101: Checking whether to apply. commitIndex: 1, lastApplied: 0
+[peer 3] 2020/12/10 19:18:29.081679 raft.go:101: Apply message with index 2 and command 200!
+[peer 3] 2020/12/10 19:18:29.081714 raft.go:101: rf.commitIndex: 1
+[peer 1] 2020/12/10 19:18:29.081716 raft.go:101: Checking whether to apply. commitIndex: 1, lastApplied: 0
+[peer 1] 2020/12/10 19:18:29.081774 raft.go:101: Apply message with index 2 and command 200!
+[peer 1] 2020/12/10 19:18:29.081795 raft.go:101: rf.commitIndex: 1
+[peer 0] 2020/12/10 19:18:29.081721 raft.go:101: rf.commitIndex: 1
+[peer 0] 2020/12/10 19:18:29.082010 raft.go:101: rf.commitIndex: 1
+[peer 0] 2020/12/10 19:18:29.082046 raft.go:101: rf.commitIndex: 1
+reading cfg.logs ... expected index: 2
+cfg.logs[0]: map[1:100 2:200]
+cfg.logs[0][2] - cmd1: 200, ok: true
+cfg.logs[1]: map[1:100 2:200]
+cfg.logs[1][2] - cmd1: 200, ok: true
+cfg.logs[2]: map[1:100 2:200]
+cfg.logs[2][2] - cmd1: 200, ok: true
+cfg.logs[3]: map[1:100 2:200]
+cfg.logs[3][2] - cmd1: 200, ok: true
+cfg.logs[4]: map[1:100 2:200]
+cfg.logs[4][2] - cmd1: 200, ok: true
+nCommitted: checking whether some have committed before Start(), index: 3
+reading cfg.logs ... expected index: 3
+cfg.logs[0]: map[1:100 2:200]
+cfg.logs[0][3] - cmd1: 0, ok: false
+cfg.logs[1]: map[1:100 2:200]
+cfg.logs[1][3] - cmd1: 0, ok: false
+cfg.logs[2]: map[1:100 2:200]
+cfg.logs[2][3] - cmd1: 0, ok: false
+cfg.logs[3]: map[1:100 2:200]
+cfg.logs[3][3] - cmd1: 0, ok: false
+cfg.logs[4]: map[1:100 2:200]
+cfg.logs[4][3] - cmd1: 0, ok: false
+[peer 0] 2020/12/10 19:18:29.101375 raft.go:101: Start agreement on command: 300 [int]
+[peer 0] 2020/12/10 19:18:29.101418 raft.go:101: I am the leader. I append the new command, now logs: [{1 100} {1 200} {1 300}]
+Oh, Start() has returned index 3, let's check it!
+reading cfg.logs ... expected index: 3
+cfg.logs[0]: map[1:100 2:200]
+cfg.logs[0][3] - cmd1: 0, ok: false
+cfg.logs[1]: map[1:100 2:200]
+cfg.logs[1][3] - cmd1: 0, ok: false
+cfg.logs[2]: map[1:100 2:200]
+cfg.logs[2][3] - cmd1: 0, ok: false
+cfg.logs[3]: map[1:100 2:200]
+cfg.logs[3][3] - cmd1: 0, ok: false
+cfg.logs[4]: map[1:100 2:200]
+cfg.logs[4][3] - cmd1: 0, ok: false
+[peer 0] 2020/12/10 19:18:29.101680 raft.go:101: Sending new entries to peer 4, entries: [{1 300}], leaderCommit: 1
+[peer 0] 2020/12/10 19:18:29.101703 raft.go:101: nextIndex[4]: 2, lastLogIndex: 2
+[peer 4] 2020/12/10 19:18:29.102145 raft.go:101: Checking whether to apply. commitIndex: 1, lastApplied: 1
+[peer 4] 2020/12/10 19:18:29.102188 raft.go:101: Receive append entries [{1 300}] from peer 0 in term 1, receiver's term is 1.
+[peer 4] 2020/12/10 19:18:29.102216 raft.go:101: before updating, args.PrevLogIndex: 1	len(rf.logs): 2	logs: [{1 100} {1 200}]
+[peer 4] 2020/12/10 19:18:29.102237 raft.go:101: k: 2, upperbound: 3
+[peer 4] 2020/12/10 19:18:29.102258 raft.go:101: k: 2, upperbound: 3
+[peer 4] 2020/12/10 19:18:29.102285 raft.go:101: after updating, logs: [{1 100} {1 200} {1 300}]
+[peer 4] 2020/12/10 19:18:29.102307 raft.go:101: rf.commitIndex: 1
+[peer 0] 2020/12/10 19:18:29.102502 raft.go:101: Before updating nextindex, nextindex: 2
+[peer 0] 2020/12/10 19:18:29.102536 raft.go:101: Suceess. nextindex: 3
+[peer 0] 2020/12/10 19:18:29.102555 raft.go:101: rf.commitIndex: 2
+[peer 0] 2020/12/10 19:18:29.102601 raft.go:101: Sending new entries to peer 1, entries: [{1 300}], leaderCommit: 2
+[peer 0] 2020/12/10 19:18:29.102619 raft.go:101: nextIndex[1]: 2, lastLogIndex: 2
+[peer 1] 2020/12/10 19:18:29.102935 raft.go:101: Checking whether to apply. commitIndex: 1, lastApplied: 1
+[peer 1] 2020/12/10 19:18:29.102969 raft.go:101: Receive append entries [{1 300}] from peer 0 in term 1, receiver's term is 1.
+[peer 1] 2020/12/10 19:18:29.102994 raft.go:101: before updating, args.PrevLogIndex: 1	len(rf.logs): 2	logs: [{1 100} {1 200}]
+[peer 1] 2020/12/10 19:18:29.103014 raft.go:101: k: 2, upperbound: 3
+[peer 1] 2020/12/10 19:18:29.103035 raft.go:101: k: 2, upperbound: 3
+[peer 1] 2020/12/10 19:18:29.103062 raft.go:101: after updating, logs: [{1 100} {1 200} {1 300}]
+[peer 1] 2020/12/10 19:18:29.103084 raft.go:101: rf.commitIndex: 2
+[peer 0] 2020/12/10 19:18:29.103249 raft.go:101: Before updating nextindex, nextindex: 2
+[peer 0] 2020/12/10 19:18:29.103274 raft.go:101: Suceess. nextindex: 3
+[peer 0] 2020/12/10 19:18:29.103292 raft.go:101: rf.commitIndex: 2
+[peer 0] 2020/12/10 19:18:29.103332 raft.go:101: Sending new entries to peer 2, entries: [{1 300}], leaderCommit: 2
+[peer 0] 2020/12/10 19:18:29.103351 raft.go:101: nextIndex[2]: 2, lastLogIndex: 2
+[peer 2] 2020/12/10 19:18:29.103657 raft.go:101: Checking whether to apply. commitIndex: 1, lastApplied: 1
+[peer 2] 2020/12/10 19:18:29.103691 raft.go:101: Receive append entries [{1 300}] from peer 0 in term 1, receiver's term is 1.
+[peer 2] 2020/12/10 19:18:29.103716 raft.go:101: before updating, args.PrevLogIndex: 1	len(rf.logs): 2	logs: [{1 100} {1 200}]
+[peer 2] 2020/12/10 19:18:29.103737 raft.go:101: k: 2, upperbound: 3
+[peer 2] 2020/12/10 19:18:29.103758 raft.go:101: k: 2, upperbound: 3
+[peer 2] 2020/12/10 19:18:29.103783 raft.go:101: after updating, logs: [{1 100} {1 200} {1 300}]
+[peer 2] 2020/12/10 19:18:29.103805 raft.go:101: rf.commitIndex: 2
+[peer 0] 2020/12/10 19:18:29.103975 raft.go:101: Before updating nextindex, nextindex: 2
+[peer 0] 2020/12/10 19:18:29.103999 raft.go:101: Suceess. nextindex: 3
+[peer 0] 2020/12/10 19:18:29.104021 raft.go:101: rf.commitIndex: 2
+[peer 0] 2020/12/10 19:18:29.104056 raft.go:101: Sending new entries to peer 3, entries: [{1 300}], leaderCommit: 2
+[peer 0] 2020/12/10 19:18:29.104075 raft.go:101: nextIndex[3]: 2, lastLogIndex: 2
+[peer 3] 2020/12/10 19:18:29.104402 raft.go:101: Checking whether to apply. commitIndex: 1, lastApplied: 1
+[peer 3] 2020/12/10 19:18:29.104436 raft.go:101: Receive append entries [{1 300}] from peer 0 in term 1, receiver's term is 1.
+[peer 3] 2020/12/10 19:18:29.104461 raft.go:101: before updating, args.PrevLogIndex: 1	len(rf.logs): 2	logs: [{1 100} {1 200}]
+[peer 3] 2020/12/10 19:18:29.104481 raft.go:101: k: 2, upperbound: 3
+[peer 3] 2020/12/10 19:18:29.104503 raft.go:101: k: 2, upperbound: 3
+[peer 3] 2020/12/10 19:18:29.104529 raft.go:101: after updating, logs: [{1 100} {1 200} {1 300}]
+[peer 3] 2020/12/10 19:18:29.104551 raft.go:101: rf.commitIndex: 2
+[peer 0] 2020/12/10 19:18:29.104775 raft.go:101: Before updating nextindex, nextindex: 2
+[peer 0] 2020/12/10 19:18:29.104802 raft.go:101: Suceess. nextindex: 3
+[peer 0] 2020/12/10 19:18:29.104821 raft.go:101: rf.commitIndex: 2
+reading cfg.logs ... expected index: 3
+cfg.logs[0]: map[1:100 2:200 3:300]
+cfg.logs[0][3] - cmd1: 300, ok: true
+cfg.logs[1]: map[1:100 2:200]
+cfg.logs[1][3] - cmd1: 0, ok: false
+cfg.logs[2]: map[1:100 2:200]
+cfg.logs[2][3] - cmd1: 0, ok: false
+cfg.logs[3]: map[1:100 2:200]
+cfg.logs[3][3] - cmd1: 0, ok: false
+cfg.logs[4]: map[1:100 2:200]
+cfg.logs[4][3] - cmd1: 0, ok: false
+reading cfg.logs ... expected index: 3
+cfg.logs[0]: map[1:100 2:200 3:300]
+cfg.logs[0][3] - cmd1: 300, ok: true
+cfg.logs[1]: map[1:100 2:200]
+cfg.logs[1][3] - cmd1: 0, ok: false
+cfg.logs[2]: map[1:100 2:200]
+cfg.logs[2][3] - cmd1: 0, ok: false
+cfg.logs[3]: map[1:100 2:200]
+cfg.logs[3][3] - cmd1: 0, ok: false
+cfg.logs[4]: map[1:100 2:200]
+cfg.logs[4][3] - cmd1: 0, ok: false
+reading cfg.logs ... expected index: 3
+cfg.logs[0]: map[1:100 2:200 3:300]
+cfg.logs[0][3] - cmd1: 300, ok: true
+cfg.logs[1]: map[1:100 2:200]
+cfg.logs[1][3] - cmd1: 0, ok: false
+cfg.logs[2]: map[1:100 2:200]
+cfg.logs[2][3] - cmd1: 0, ok: false
+cfg.logs[3]: map[1:100 2:200]
+cfg.logs[3][3] - cmd1: 0, ok: false
+cfg.logs[4]: map[1:100 2:200]
+cfg.logs[4][3] - cmd1: 0, ok: false
+[peer 1] 2020/12/10 19:18:29.181360 raft.go:101: Checking whether to apply. commitIndex: 2, lastApplied: 1
+[peer 3] 2020/12/10 19:18:29.181441 raft.go:101: Checking whether to apply. commitIndex: 2, lastApplied: 1
+[peer 3] 2020/12/10 19:18:29.181503 raft.go:101: Apply message with index 3 and command 300!
+[peer 3] 2020/12/10 19:18:29.181528 raft.go:101: rf.commitIndex: 2
+[peer 2] 2020/12/10 19:18:29.181450 raft.go:101: Checking whether to apply. commitIndex: 2, lastApplied: 1
+[peer 2] 2020/12/10 19:18:29.181623 raft.go:101: Apply message with index 3 and command 300!
+[peer 2] 2020/12/10 19:18:29.181649 raft.go:101: rf.commitIndex: 2
+[peer 0] 2020/12/10 19:18:29.181749 raft.go:101: rf.commitIndex: 2
+[peer 1] 2020/12/10 19:18:29.181469 raft.go:101: Apply message with index 3 and command 300!
+[peer 1] 2020/12/10 19:18:29.181782 raft.go:101: rf.commitIndex: 2
+[peer 4] 2020/12/10 19:18:29.181432 raft.go:101: Checking whether to apply. commitIndex: 1, lastApplied: 1
+[peer 4] 2020/12/10 19:18:29.181837 raft.go:101: rf.commitIndex: 2
+[peer 0] 2020/12/10 19:18:29.181838 raft.go:101: rf.commitIndex: 2
+[peer 0] 2020/12/10 19:18:29.181985 raft.go:101: rf.commitIndex: 2
+[peer 0] 2020/12/10 19:18:29.182013 raft.go:101: rf.commitIndex: 2
+reading cfg.logs ... expected index: 3
+cfg.logs[0]: map[1:100 2:200 3:300]
+cfg.logs[0][3] - cmd1: 300, ok: true
+cfg.logs[1]: map[1:100 2:200 3:300]
+cfg.logs[1][3] - cmd1: 300, ok: true
+cfg.logs[2]: map[1:100 2:200 3:300]
+cfg.logs[2][3] - cmd1: 300, ok: true
+cfg.logs[3]: map[1:100 2:200 3:300]
+cfg.logs[3][3] - cmd1: 300, ok: true
+cfg.logs[4]: map[1:100 2:200]
+cfg.logs[4][3] - cmd1: 0, ok: false
+reading cfg.logs ... expected index: 3
+cfg.logs[0]: map[1:100 2:200 3:300]
+cfg.logs[0][3] - cmd1: 300, ok: true
+cfg.logs[1]: map[1:100 2:200 3:300]
+cfg.logs[1][3] - cmd1: 300, ok: true
+cfg.logs[2]: map[1:100 2:200 3:300]
+cfg.logs[2][3] - cmd1: 300, ok: true
+cfg.logs[3]: map[1:100 2:200 3:300]
+cfg.logs[3][3] - cmd1: 300, ok: true
+cfg.logs[4]: map[1:100 2:200]
+cfg.logs[4][3] - cmd1: 0, ok: false
+reading cfg.logs ... expected index: 3
+cfg.logs[0]: map[1:100 2:200 3:300]
+cfg.logs[0][3] - cmd1: 300, ok: true
+cfg.logs[1]: map[1:100 2:200 3:300]
+cfg.logs[1][3] - cmd1: 300, ok: true
+cfg.logs[2]: map[1:100 2:200 3:300]
+cfg.logs[2][3] - cmd1: 300, ok: true
+cfg.logs[3]: map[1:100 2:200 3:300]
+cfg.logs[3][3] - cmd1: 300, ok: true
+cfg.logs[4]: map[1:100 2:200]
+cfg.logs[4][3] - cmd1: 0, ok: false
+reading cfg.logs ... expected index: 3
+cfg.logs[0]: map[1:100 2:200 3:300]
+cfg.logs[0][3] - cmd1: 300, ok: true
+cfg.logs[1]: map[1:100 2:200 3:300]
+cfg.logs[1][3] - cmd1: 300, ok: true
+cfg.logs[2]: map[1:100 2:200 3:300]
+cfg.logs[2][3] - cmd1: 300, ok: true
+cfg.logs[3]: map[1:100 2:200 3:300]
+cfg.logs[3][3] - cmd1: 300, ok: true
+cfg.logs[4]: map[1:100 2:200]
+cfg.logs[4][3] - cmd1: 0, ok: false
+reading cfg.logs ... expected index: 3
+cfg.logs[0]: map[1:100 2:200 3:300]
+cfg.logs[0][3] - cmd1: 300, ok: true
+cfg.logs[1]: map[1:100 2:200 3:300]
+cfg.logs[1][3] - cmd1: 300, ok: true
+cfg.logs[2]: map[1:100 2:200 3:300]
+cfg.logs[2][3] - cmd1: 300, ok: true
+cfg.logs[3]: map[1:100 2:200 3:300]
+cfg.logs[3][3] - cmd1: 300, ok: true
+cfg.logs[4]: map[1:100 2:200]
+cfg.logs[4][3] - cmd1: 0, ok: false
+[peer 3] 2020/12/10 19:18:29.281361 raft.go:101: Checking whether to apply. commitIndex: 2, lastApplied: 2
+[peer 3] 2020/12/10 19:18:29.281424 raft.go:101: rf.commitIndex: 2
+[peer 1] 2020/12/10 19:18:29.281391 raft.go:101: Checking whether to apply. commitIndex: 2, lastApplied: 2
+[peer 1] 2020/12/10 19:18:29.281521 raft.go:101: rf.commitIndex: 2
+[peer 2] 2020/12/10 19:18:29.281408 raft.go:101: Checking whether to apply. commitIndex: 2, lastApplied: 2
+[peer 2] 2020/12/10 19:18:29.281592 raft.go:101: rf.commitIndex: 2
+[peer 4] 2020/12/10 19:18:29.281428 raft.go:101: Checking whether to apply. commitIndex: 2, lastApplied: 1
+[peer 4] 2020/12/10 19:18:29.281691 raft.go:101: Apply message with index 3 and command 300!
+[peer 4] 2020/12/10 19:18:29.281710 raft.go:101: rf.commitIndex: 2
+[peer 0] 2020/12/10 19:18:29.281567 raft.go:101: rf.commitIndex: 2
+[peer 0] 2020/12/10 19:18:29.281792 raft.go:101: rf.commitIndex: 2
+[peer 0] 2020/12/10 19:18:29.281809 raft.go:101: rf.commitIndex: 2
+[peer 0] 2020/12/10 19:18:29.281871 raft.go:101: rf.commitIndex: 2
+reading cfg.logs ... expected index: 3
+cfg.logs[0]: map[1:100 2:200 3:300]
+cfg.logs[0][3] - cmd1: 300, ok: true
+cfg.logs[1]: map[1:100 2:200 3:300]
+cfg.logs[1][3] - cmd1: 300, ok: true
+cfg.logs[2]: map[1:100 2:200 3:300]
+cfg.logs[2][3] - cmd1: 300, ok: true
+cfg.logs[3]: map[1:100 2:200 3:300]
+cfg.logs[3][3] - cmd1: 300, ok: true
+cfg.logs[4]: map[1:100 2:200 3:300]
+cfg.logs[4][3] - cmd1: 300, ok: true
+  ... Passed
+[peer 2] 2020/12/10 19:18:29.381351 raft.go:101: Checking whether to apply. commitIndex: 2, lastApplied: 2
+[peer 2] 2020/12/10 19:18:29.381399 raft.go:101: rf.commitIndex: 2
+[peer 4] 2020/12/10 19:18:29.381352 raft.go:101: Checking whether to apply. commitIndex: 2, lastApplied: 2
+[peer 4] 2020/12/10 19:18:29.381478 raft.go:101: rf.commitIndex: 2
+[peer 0] 2020/12/10 19:18:29.381509 raft.go:101: rf.commitIndex: 2
+[peer 1] 2020/12/10 19:18:29.381360 raft.go:101: Checking whether to apply. commitIndex: 2, lastApplied: 2
+[peer 1] 2020/12/10 19:18:29.381528 raft.go:101: rf.commitIndex: 2
+[peer 0] 2020/12/10 19:18:29.381618 raft.go:101: rf.commitIndex: 2
+[peer 0] 2020/12/10 19:18:29.381635 raft.go:101: rf.commitIndex: 2
+[peer 3] 2020/12/10 19:18:29.381368 raft.go:101: Checking whether to apply. commitIndex: 2, lastApplied: 2
+[peer 3] 2020/12/10 19:18:29.381648 raft.go:101: rf.commitIndex: 2
+[peer 0] 2020/12/10 19:18:29.381755 raft.go:101: rf.commitIndex: 2
+PASS
+ok  	raft	1.044s
