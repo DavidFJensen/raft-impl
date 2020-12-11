@@ -27,7 +27,7 @@ import (
 	"time"
 )
 
-const DEBUG = 1
+const DEBUG = 0
 
 // import "bytes"
 // import "encoding/gob"
@@ -37,7 +37,7 @@ const (
 	RaftHeartBeatLoop      = 100 * time.Millisecond
 )
 
-var colorTheme = [...]string {
+var colorTheme = [...]string{
 	"\033[1;32m", // green
 	"\033[1;33m", // yellow
 	"\033[1;34m", // blue
@@ -87,7 +87,7 @@ func (mu *RaftMutex) Unlock() {
 }
 
 type RaftLogger struct {
-	rf *Raft
+	rf     *Raft
 	logger *log.Logger
 }
 
@@ -99,7 +99,7 @@ func (rl *RaftLogger) Println(v ...interface{}) {
 
 func (rl *RaftLogger) Printf(format string, v ...interface{}) {
 	if DEBUG == 1 {
-		rl.logger.Printf(format + "\033[0m", v...)
+		rl.logger.Printf(format+"\033[0m", v...)
 	}
 }
 
@@ -220,7 +220,7 @@ func (rf *Raft) RequestVote(args RequestVoteArgs, reply *RequestVoteReply) {
 	// Your code here.
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
-	rf.logger.Printf("Receive vote request from peer %v in term %v, my term is %v. Now my votedFor: %v",
+	rf.logger.Printf("Receive vote request from peer %v in term %v, my term is %v. Now my votedFor: %v.",
 		args.CandidateId, args.Term, rf.currentTerm, rf.votedFor)
 	replyTerm := args.Term
 	if rf.currentTerm > args.Term {
@@ -233,9 +233,14 @@ func (rf *Raft) RequestVote(args RequestVoteArgs, reply *RequestVoteReply) {
 	// if rf.state == 1 || rf.state == 2 {
 	// 	rf.becomeFollower()
 	// }
+	if len(rf.logs) > 0 {
+		rf.logger.Printf("The vote info: args.LastLogTerm: %v, my last log term: %v. args.LastLogIndex: %v, my last index: %v",
+			args.LastLogTerm, rf.logs[len(rf.logs)-1].Term, args.LastLogIndex, len(rf.logs)-1)
+	}
 	if args.Term >= rf.currentTerm && (rf.votedFor == -1 || rf.votedFor == args.CandidateId) &&
-		(len(rf.logs) == 0 || args.LastLogTerm >= rf.logs[len(rf.logs)-1].Term ||
-			args.LastLogIndex >= len(rf.logs)-1) {
+		(len(rf.logs) == 0 || args.LastLogTerm > rf.logs[len(rf.logs)-1].Term ||
+			(args.LastLogTerm == rf.logs[len(rf.logs)-1].Term &&
+				args.LastLogIndex >= len(rf.logs)-1)) {
 		reply.Term = replyTerm
 		reply.VoteGranted = true
 		rf.votedFor = args.CandidateId
@@ -250,9 +255,15 @@ func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply)
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
 	replyTerm := args.Term
-	if len(args.Entries) == 0 {
-		rf.logger.Printf("Receive heartbeat from %v, leader's Term: %v, my Term: %v", args.LeaderId, args.Term, rf.currentTerm)
+	if len(args.Entries) != 0 {
+		rf.logger.Printf("Receive append entries %v from %v, leader's Term: %v, my Term: %v",
+			args.Entries, args.LeaderId, args.Term, rf.currentTerm)
+	} else {
+		rf.logger.Printf("Receive heartbeat %v from %v, leader's Term: %v, my Term: %v",
+			args.Entries, args.LeaderId, args.Term, rf.currentTerm)
 	}
+	rf.logger.Printf("args.PrevLogIndex: %v, args.PrevLogTerm: %v, my logs: %v",
+		args.PrevLogIndex, args.PrevLogTerm, rf.logs)
 	if rf.currentTerm > args.Term {
 		replyTerm = rf.currentTerm
 	} else {
@@ -263,6 +274,7 @@ func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply)
 	if rf.currentTerm > args.Term {
 		reply.Success = false
 	} else {
+		reply.Success = true
 		rf.electionTimeout.Reset(getRandElectionTimeout())
 		// safe to apply
 		rf.logger.Printf("Checking whether to apply. commitIndex: %v, lastApplied: %v", rf.commitIndex, rf.lastApplied)
@@ -274,38 +286,36 @@ func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply)
 			rf.applyCh <- applyMsg
 			rf.logger.Printf("Apply message with index %v and command %v!", applyMsg.Index, applyMsg.Command)
 		}
-		if len(args.Entries) > 0 {
+		if args.PrevLogIndex >= len(rf.logs) ||
+			(args.PrevLogIndex >= 0 && args.PrevLogTerm != rf.logs[args.PrevLogIndex].Term) {
+			reply.Success = false
+			rf.logger.Printf("Not match!")
+		} else if len(args.Entries) > 0 {
 			rf.logger.Printf("Receive append entries %v from peer %v in term %v, receiver's term is %v.",
 				args.Entries, args.LeaderId, args.Term, rf.currentTerm)
 			rf.logger.Printf("before updating, args.PrevLogIndex: %v\tlen(rf.logs): %v\tlogs: %v",
 				args.PrevLogIndex, len(rf.logs), rf.logs)
-			if args.PrevLogIndex >= len(rf.logs) ||
-				(args.PrevLogIndex >= 0 && args.PrevLogTerm != rf.logs[args.PrevLogIndex].Term) {
-				reply.Success = false
-				rf.logger.Printf("Not match!")
-			} else {
-				reply.Success = true
-				k := args.PrevLogIndex + 1
-				rf.logger.Printf("k: %v, upperbound: %v", k, args.PrevLogIndex+1+len(args.Entries))
-				for ; k < args.PrevLogIndex+1+len(args.Entries); k++ {
-					if len(rf.logs)-1 >= k {
-						if rf.logs[k].Term != args.Entries[k-args.PrevLogIndex-1].Term {
-							rf.logs = rf.logs[:k]
-							break
-						}
-					} else {
+			reply.Success = true
+			k := args.PrevLogIndex + 1
+			rf.logger.Printf("k: %v, upperbound: %v", k, args.PrevLogIndex+1+len(args.Entries))
+			for ; k < args.PrevLogIndex+1+len(args.Entries); k++ {
+				if len(rf.logs)-1 >= k {
+					if rf.logs[k].Term != args.Entries[k-args.PrevLogIndex-1].Term {
+						rf.logs = rf.logs[:k]
 						break
 					}
+				} else {
+					break
 				}
-				rf.logger.Printf("k: %v, upperbound: %v", k, args.PrevLogIndex+1+len(args.Entries))
-				for i := k; i < args.PrevLogIndex+1+len(args.Entries); i++ {
-					entry := args.Entries[i-args.PrevLogIndex-1]
-					rf.logs = append(rf.logs, LogEntry{entry.Term, entry.Value})
-				}
-				rf.logger.Printf("after updating, logs: %v", rf.logs)
 			}
+			rf.logger.Printf("k: %v, upperbound: %v", k, args.PrevLogIndex+1+len(args.Entries))
+			for i := k; i < args.PrevLogIndex+1+len(args.Entries); i++ {
+				entry := args.Entries[i-args.PrevLogIndex-1]
+				rf.logs = append(rf.logs, LogEntry{entry.Term, entry.Value})
+			}
+			rf.logger.Printf("after updating, logs: %v", rf.logs)
 		}
-		if args.LeaderCommit > rf.commitIndex {
+		if reply.Success && args.LeaderCommit > rf.commitIndex {
 			rf.commitIndex = args.LeaderCommit
 			if rf.commitIndex > len(rf.logs)-1 {
 				rf.commitIndex = len(rf.logs) - 1
@@ -375,13 +385,13 @@ func (rf *Raft) sendAppendEntries(server int, args AppendEntriesArgs, reply *App
 			rf.becomeFollower()
 			rf.currentTerm = reply.Term
 		}
-		if len(args.Entries) > 0 {
+		if len(args.Entries) > 0 && rf.state == 2 {
 			rf.logger.Printf("Before updating nextindex for peer %v, nextindex: %v",
 				server, rf.nextIndex[server])
 			if reply.Success {
 				rf.nextIndex[server] = args.PrevLogIndex + 1 + len(args.Entries)
-				rf.matchIndex[server] = rf.nextIndex[server] - 1 //FIXME:
-				rf.logger.Printf("Suceess. Update nextindex for peer %v: %v, because newly add %v", 
+				rf.matchIndex[server] = rf.nextIndex[server] - 1
+				rf.logger.Printf("Suceess. Update nextindex for peer %v: %v, because newly add %v",
 					server, rf.nextIndex[server], args.Entries)
 			} else {
 				rf.nextIndex[server] = args.PrevLogIndex
@@ -476,7 +486,7 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 		if i == rf.me {
 			continue
 		}
-		if len(rf.logs) - 1 >= rf.nextIndex[i] {
+		if len(rf.logs)-1 >= rf.nextIndex[i] {
 			rf.mu.Unlock()
 			go func(i int, rf *Raft) {
 				rf.mu.Lock()
@@ -607,9 +617,9 @@ func (rf *Raft) sendHeartBeat() {
 			args := AppendEntriesArgs{}
 			args.Term = rf.currentTerm
 			args.LeaderId = rf.me
-			args.PrevLogIndex = -1 //FIXME:
+			args.PrevLogIndex = len(rf.logs) - 1
 			if len(rf.logs) > 0 {
-				args.PrevLogTerm = -1 //FIXME:
+				args.PrevLogTerm = rf.logs[len(rf.logs)-1].Term
 			}
 			args.LeaderCommit = rf.commitIndex
 			var reply AppendEntriesReply
@@ -665,7 +675,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	rf.mu = &RaftMutex{}
 	rf.mu.rf = rf
 	rf.me = me
-	prefix := fmt.Sprintf("%v[peer %v] ", colorTheme[rf.me % len(colorTheme)], rf.me)
+	prefix := fmt.Sprintf("%v[peer %v] ", colorTheme[rf.me%len(colorTheme)], rf.me)
 	logger := log.New(os.Stdout, prefix, log.Ldate|log.Lmicroseconds|log.Lshortfile)
 	rf.logger = &RaftLogger{}
 	rf.logger.logger = logger
