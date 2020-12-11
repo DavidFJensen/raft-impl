@@ -33,9 +33,16 @@ const DEBUG = 1
 // import "encoding/gob"
 
 const (
-	RaftElectionTimeoutMin = 500 * time.Millisecond
+	RaftElectionTimeoutMin = 400 * time.Millisecond
 	RaftHeartBeatLoop      = 100 * time.Millisecond
 )
+
+var colorTheme = [...]string {
+	"\033[1;32m", // green
+	"\033[1;33m", // yellow
+	"\033[1;34m", // blue
+	"\033[1;31m", // red
+	"\033[1;36m"} // cyan
 
 //
 // as each Raft peer becomes aware that successive log entries are
@@ -80,18 +87,19 @@ func (mu *RaftMutex) Unlock() {
 }
 
 type RaftLogger struct {
+	rf *Raft
 	logger *log.Logger
 }
 
 func (rl *RaftLogger) Println(v ...interface{}) {
 	if DEBUG == 1 {
-		rl.logger.Println(v...)
+		rl.logger.Printf("%v\033[0m", v...)
 	}
 }
 
 func (rl *RaftLogger) Printf(format string, v ...interface{}) {
 	if DEBUG == 1 {
-		rl.logger.Printf(format, v...)
+		rl.logger.Printf(format + "\033[0m", v...)
 	}
 }
 
@@ -362,18 +370,22 @@ func (rf *Raft) sendAppendEntries(server int, args AppendEntriesArgs, reply *App
 	}
 	if ok {
 		if rf.currentTerm < reply.Term {
+			rf.logger.Printf("Fuck, My term is %v and I received an AppendEntryRPC from %v in term %v.", rf.currentTerm,
+				server, reply.Term)
 			rf.becomeFollower()
 			rf.currentTerm = reply.Term
 		}
 		if len(args.Entries) > 0 {
-			rf.logger.Printf("Before updating nextindex, nextindex: %v", rf.nextIndex[server])
+			rf.logger.Printf("Before updating nextindex for peer %v, nextindex: %v",
+				server, rf.nextIndex[server])
 			if reply.Success {
-				rf.nextIndex[server] += len(args.Entries)
-				rf.matchIndex[server] += len(args.Entries)
-				rf.logger.Printf("Suceess. nextindex: %v", rf.nextIndex[server])
+				rf.nextIndex[server] = args.PrevLogIndex + 1 + len(args.Entries)
+				rf.matchIndex[server] = rf.nextIndex[server] - 1 //FIXME:
+				rf.logger.Printf("Suceess. Update nextindex for peer %v: %v, because newly add %v", 
+					server, rf.nextIndex[server], args.Entries)
 			} else {
-				rf.nextIndex[server]--
-				rf.matchIndex[server]--
+				rf.nextIndex[server] = args.PrevLogIndex
+				rf.matchIndex[server] = rf.nextIndex[server] - 1
 				rf.logger.Printf("Unmatch. nextindex: %v", rf.nextIndex[server])
 				newArgs := AppendEntriesArgs{}
 				newArgs.Term = rf.currentTerm
@@ -460,19 +472,19 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	rf.logger.Printf("I am the leader. I append the new command, now logs: %v", rf.logs)
 	rf.nextIndex[rf.me] = len(rf.logs)
 	rf.matchIndex[rf.me] = len(rf.logs) - 1
-	lastLogIndex := index
 	for i := range rf.peers {
 		if i == rf.me {
 			continue
 		}
-		if lastLogIndex >= rf.nextIndex[i] {
+		if len(rf.logs) - 1 >= rf.nextIndex[i] {
 			rf.mu.Unlock()
-			go func(i int, rf *Raft, lastLogIndex int) {
+			go func(i int, rf *Raft) {
 				rf.mu.Lock()
 				if rf.state != 2 {
 					rf.mu.Unlock()
 					return
 				}
+				lastLogIndex := len(rf.logs) - 1
 				args := AppendEntriesArgs{}
 				args.Term = rf.currentTerm
 				args.LeaderId = rf.me
@@ -490,7 +502,7 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 				var reply AppendEntriesReply
 				rf.mu.Unlock()
 				rf.sendAppendEntries(i, args, &reply)
-			}(i, rf, lastLogIndex)
+			}(i, rf)
 			rf.mu.Lock()
 		}
 	}
@@ -533,6 +545,7 @@ func (rf *Raft) startElection() {
 	rf.state = 1 // change to candidate
 	rf.logger.Println("become a candidate.")
 	rf.currentTerm++ // increment currentTerm
+	rf.logger.Printf("My term increases to %v", rf.currentTerm)
 	rf.voteNum = 1
 	rf.votedFor = rf.me                                // Vote for self
 	rf.electionTimeout.Reset(getRandElectionTimeout()) // Reset election Timer
@@ -652,10 +665,11 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	rf.mu = &RaftMutex{}
 	rf.mu.rf = rf
 	rf.me = me
-	prefix := fmt.Sprintf("[peer %v] ", rf.me)
+	prefix := fmt.Sprintf("%v[peer %v] ", colorTheme[rf.me % len(colorTheme)], rf.me)
 	logger := log.New(os.Stdout, prefix, log.Ldate|log.Lmicroseconds|log.Lshortfile)
 	rf.logger = &RaftLogger{}
 	rf.logger.logger = logger
+	rf.logger.rf = rf
 	rf.peers = peers
 	rf.persister = persister
 
