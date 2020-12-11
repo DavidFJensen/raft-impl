@@ -446,11 +446,11 @@ func (rf *Raft) sendAppendEntries(server int, args AppendEntriesArgs, reply *App
 			} else {
 				rf.logger.Printf("Unmatch of %v. nextindex: %v. args: %v", server, rf.nextIndex[server], args)
 				if args.PrevLogIndex >= 0 {
-					// if reply.ExpectedNextIndex != -1 {
-					// 	rf.nextIndex[server] = reply.ExpectedNextIndex
-					// } else {
+					if reply.ExpectedNextIndex != -1 {
+						rf.nextIndex[server] = reply.ExpectedNextIndex
+					} else {
 						rf.nextIndex[server] = args.PrevLogIndex
-					// }
+					}
 					newArgs := AppendEntriesArgs{}
 					newArgs.Term = rf.currentTerm
 					newArgs.LeaderId = rf.me
