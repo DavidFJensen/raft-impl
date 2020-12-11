@@ -298,9 +298,7 @@ func TestRejoin(t *testing.T) {
 
 	// leader network failure
 	leader1 := cfg.checkOneLeader()
-	fmt.Printf("first leader is %v\n", leader1)
 	cfg.disconnect(leader1)
-	fmt.Printf("Disconnect the leader %v\n", leader1)
 
 	// make old leader try to agree on some entries
 	cfg.rafts[leader1].Start(102)
@@ -312,22 +310,19 @@ func TestRejoin(t *testing.T) {
 
 	// new leader network failure
 	leader2 := cfg.checkOneLeader()
-	fmt.Printf("new leader is %v\n", leader2)
 	cfg.disconnect(leader2)
-	fmt.Printf("Disconnect the new leader %v\n", leader2)
 
 	// old leader connected again
 	cfg.connect(leader1)
-	fmt.Printf("Reconnect old leader %v\n", leader1)
 
 	cfg.one(104, 2)
 
 	// // all together now
-	// cfg.connect(leader2)
+	cfg.connect(leader2)
 
-	// cfg.one(105, servers)
+	cfg.one(105, servers)
 
-	// fmt.Printf("  ... Passed\n")
+	fmt.Printf("  ... Passed\n")
 }
 
 func TestBackup(t *testing.T) {
@@ -655,6 +650,7 @@ func TestFigure8(t *testing.T) {
 
 	nup := servers
 	for iters := 0; iters < 1000; iters++ {
+		fmt.Println(iters)
 		leader := -1
 		for i := 0; i < servers; i++ {
 			if cfg.rafts[i] != nil {
@@ -740,6 +736,7 @@ func TestFigure8Unreliable(t *testing.T) {
 
 	nup := servers
 	for iters := 0; iters < 1000; iters++ {
+		fmt.Println(iters)
 		if iters == 200 {
 			cfg.setlongreordering(true)
 		}
