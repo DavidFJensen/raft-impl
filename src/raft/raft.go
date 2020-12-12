@@ -29,7 +29,7 @@ import (
 	"time"
 )
 
-const DEBUG = 0
+const DEBUG = 1
 
 // import "bytes"
 // import "encoding/gob"
@@ -324,10 +324,9 @@ func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply)
 			(args.PrevLogIndex >= 0 && args.PrevLogTerm != rf.logs[args.PrevLogIndex].Term) {
 			reply.Success = false
 			if args.PrevLogIndex >= 0 && args.PrevLogIndex < len(rf.logs) {
-				badTerm := rf.logs[args.PrevLogIndex].Term
 				t := args.PrevLogIndex
 				for ; t >= 0; t-- {
-					if rf.logs[t].Term != badTerm {
+					if rf.logs[t].Term == args.PrevLogTerm {
 						break
 					}
 				}
