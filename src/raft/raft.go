@@ -29,7 +29,7 @@ import (
 	"time"
 )
 
-const DEBUG = 1
+const DEBUG = 0
 
 // import "bytes"
 // import "encoding/gob"
@@ -260,7 +260,10 @@ func (rf *Raft) RequestVote(args RequestVoteArgs, reply *RequestVoteReply) {
 		reply.VoteGranted = false
 		return
 	}
-	// rf.electionTimeout.Reset(getRandElectionTimeout())
+	rf.electionTimeout.Reset(getRandElectionTimeout())
+	if rf.currentTerm < args.Term {
+		rf.becomeFollower()
+	}
 	// if rf.state == 1 || rf.state == 2 {
 	// 	rf.becomeFollower()
 	// }
@@ -363,8 +366,8 @@ func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply)
 		}
 		if reply.Success && args.LeaderCommit > rf.commitIndex {
 			rf.commitIndex = args.LeaderCommit
-			if rf.commitIndex > len(rf.logs)-1 {
-				rf.commitIndex = len(rf.logs) - 1
+			if rf.commitIndex > args.PrevLogIndex + len(args.Entries) {
+				rf.commitIndex = args.PrevLogIndex + len(args.Entries)
 			}
 			rf.logger.Printf("rf.commitIndex updated to %v", rf.commitIndex)
 		}
@@ -529,6 +532,7 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	isLeader := rf.state == 2
 	if !isLeader {
 		// rf.logger.Printf("I am not a leader, return.")
+		rf.persist()
 		rf.mu.Unlock()
 		return index, term, isLeader
 	}
@@ -594,6 +598,7 @@ func (rf *Raft) Kill() {
 func (rf *Raft) startElection() {
 	rf.mu.Lock()
 	if rf.state == 2 {
+		rf.persist()
 		rf.mu.Unlock()
 		return
 	}
@@ -632,6 +637,7 @@ func (rf *Raft) startElection() {
 		go func(i int, rf *Raft) {
 			rf.mu.Lock()
 			if rf.state != 1 {
+				rf.persist()
 				rf.mu.Unlock()
 				return
 			}
@@ -644,6 +650,7 @@ func (rf *Raft) startElection() {
 				args.LastLogTerm = rf.logs[len(rf.logs)-1].Term // FIXME:
 			}
 			var reply RequestVoteReply
+			rf.persist()
 			rf.mu.Unlock()
 			rf.sendRequestVote(i, args, &reply)
 		}(i, rf)
@@ -686,6 +693,7 @@ func (rf *Raft) sendHeartBeat() {
 			rf.mu.Lock()
 			defer rf.wg.Done()
 			if rf.state != 2 {
+				rf.persist()
 				rf.mu.Unlock()
 				return
 			}
@@ -700,6 +708,7 @@ func (rf *Raft) sendHeartBeat() {
 			args.LeaderCommit = rf.commitIndex
 			var reply AppendEntriesReply
 			rf.logger.Printf("send heart beat to peer %v", i)
+			rf.persist()
 			rf.mu.Unlock()
 			rf.sendAppendEntries(i, args, &reply)
 		}(i, rf)
@@ -714,7 +723,7 @@ func (rf *Raft) sendHeartBeat() {
 
 func (rf *Raft) becomeFollower() {
 	if rf.state != 0 {
-		rf.logger.Println("become a follower.")
+		rf.logger.Printf("become a follower. My term: %v", rf.currentTerm)
 	}
 	rf.voteNum = 0
 	rf.votedFor = -1
@@ -724,10 +733,10 @@ func (rf *Raft) becomeFollower() {
 }
 
 func (rf *Raft) becomeLeader() {
-	rf.logger.Println("become a leader.")
+	rf.logger.Printf("become a leader. My term: %v", rf.currentTerm)
 	rf.state = 2
-	rf.voteNum = 0
-	rf.votedFor = -1
+	// rf.voteNum = 0
+	// rf.votedFor = -1
 	for i := range rf.nextIndex {
 		rf.nextIndex[i] = len(rf.logs)
 		rf.matchIndex[i] = -1
