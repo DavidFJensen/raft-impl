@@ -37,7 +37,7 @@ const DEBUG = 0
 const (
 	RaftElectionTimeoutMin = 150 * time.Millisecond
 	RaftHeartBeatLoop      = 50 * time.Millisecond
-	RaftBroadcastTimeout   = 10 * time.Millisecond
+	RaftBroadcastTimeout   = 30 * time.Millisecond
 )
 
 var colorTheme = [...]string{
@@ -125,7 +125,7 @@ type Raft struct {
 	state       int // 0 -- follower; 1 -- candidate; 2 -- leader
 	currentTerm int
 	votedFor    int
-	voteNum     int
+	voteSet			[]bool
 
 	electionTimeout *time.Timer
 	heartBeatTimer  *time.Timer
@@ -172,7 +172,7 @@ func (rf *Raft) persist() {
 	e.Encode(rf.currentTerm)
 	e.Encode(rf.votedFor)
 	e.Encode(rf.logs)
-	e.Encode(rf.voteNum)
+	e.Encode(rf.voteSet)
 	// e.Encode(rf.nextIndex)
 	// e.Encode(rf.matchIndex)
 	// e.Encode(rf.state)
@@ -199,10 +199,7 @@ func (rf *Raft) readPersist(data []byte) {
 	d.Decode(&rf.currentTerm)
 	d.Decode(&rf.votedFor)
 	d.Decode(&rf.logs)
-	d.Decode(&rf.voteNum)
-	// d.Decode(&rf.nextIndex)
-	// d.Decode(&rf.matchIndex)
-	// d.Decode(&rf.state)
+	d.Decode(&rf.voteSet)
 	// rf.logger.Printf("After read.")
 	// rf.logger.Printf("currentTerm: %v, votedFor: %v, logs: %v, voteNum: %v, me: %v, commitindex: %v, lastappled: %v, state: %v",
 		// rf.currentTerm, rf.votedFor, rf.logs, rf.voteNum, rf.me, rf.commitIndex, rf.lastApplied, rf.state)
@@ -402,12 +399,17 @@ func (rf *Raft) sendRequestVote(server int, args RequestVoteArgs, reply *Request
 			rf.currentTerm = reply.Term
 		}
 		if reply.VoteGranted {
-			rf.voteNum++
-			rf.logger.Printf("get voted from %v! voteNum: %v", server, rf.voteNum)
+			rf.voteSet[server] = true
 		} else {
-			rf.logger.Printf("get unvoted from %v. voteNum: %v", server, rf.voteNum)
 		}
-		if rf.voteNum > len(rf.peers)/2 {
+		voteNum := 0
+		for i := range rf.voteSet {
+			if rf.voteSet[i] {
+				voteNum++
+			}
+		}
+		rf.logger.Printf("get voted from %v? %v. voteNum: %v", server, reply.VoteGranted, voteNum)
+		if voteNum > len(rf.peers)/2 {
 			if rf.state != 2 {
 				rf.becomeLeader()
 			}
@@ -592,7 +594,7 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 //
 func (rf *Raft) Kill() {
 	// Your code here, if desired.
-	rf.killCh <- 0
+	close(rf.killCh)
 }
 
 func (rf *Raft) startElection() {
@@ -603,7 +605,9 @@ func (rf *Raft) startElection() {
 		return
 	}
 	rf.logger.Println("election timeout!")
-	rf.voteNum = 0
+	for i := range rf.voteSet {
+		rf.voteSet[i] = false
+	}
 	rf.votedFor = -1
 	if rf.state == 1 {
 		rf.logger.Printf("To avoid split, I begin waiting...")
@@ -623,7 +627,7 @@ func (rf *Raft) startElection() {
 	rf.logger.Println("become a candidate.")
 	rf.currentTerm++ // increment currentTerm
 	rf.logger.Printf("My term increases to %v", rf.currentTerm)
-	rf.voteNum = 1
+	rf.voteSet[rf.me] = true
 	rf.votedFor = rf.me                                // Vote for self
 	rf.electionTimeout.Reset(getRandElectionTimeout()) // Reset election Timer
 	rf.wg.Add(len(rf.peers) - 1)
@@ -725,7 +729,9 @@ func (rf *Raft) becomeFollower() {
 	if rf.state != 0 {
 		rf.logger.Printf("become a follower. My term: %v", rf.currentTerm)
 	}
-	rf.voteNum = 0
+	for i := range rf.voteSet {
+		rf.voteSet[i] = false
+	}
 	rf.votedFor = -1
 	rf.electionTimeout.Reset(getRandElectionTimeout())
 	rf.state = 0
@@ -779,6 +785,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	rf.state = 0
 	rf.currentTerm = 0
 	rf.votedFor = -1
+	rf.voteSet = make([]bool, len(peers))
 	rf.commitIndex = -1
 	rf.lastApplied = -1
 	rf.electionTimeout = time.NewTimer(getRandElectionTimeout())
