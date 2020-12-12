@@ -29,7 +29,7 @@ import (
 	"time"
 )
 
-const DEBUG = 1
+const DEBUG = 0
 
 // import "bytes"
 // import "encoding/gob"
@@ -323,17 +323,13 @@ func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply)
 		if args.PrevLogIndex >= len(rf.logs) ||
 			(args.PrevLogIndex >= 0 && args.PrevLogTerm != rf.logs[args.PrevLogIndex].Term) {
 			reply.Success = false
-			if args.PrevLogIndex >= 0 && args.PrevLogIndex < len(rf.logs) {
-				t := args.PrevLogIndex
-				for ; t >= 0; t-- {
-					if rf.logs[t].Term == args.PrevLogTerm {
-						break
-					}
+			t := args.PrevLogIndex
+			for ; t >= 0; t-- {
+				if t < len(rf.logs) && rf.logs[t].Term == args.PrevLogTerm {
+					break
 				}
-				reply.ExpectedNextIndex = t + 1
-			} else {
-				reply.ExpectedNextIndex = -1
 			}
+			reply.ExpectedNextIndex = t + 1
 			rf.logger.Printf("Not match!!! my len(logs): %v, my logs: %v", len(rf.logs), rf.logs)
 		} else if len(args.Entries) > 0 {
 			rf.logger.Printf("Receive append entries %v from peer %v in term %v, receiver's term is %v.",
