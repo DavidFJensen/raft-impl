@@ -53,7 +53,7 @@ func TestReElection(t *testing.T) {
 
 	// if the leader disconnects, a new one should be elected.
 	cfg.disconnect(leader1)
-	fmt.Printf("Disconnect leader %v\n", leader1)
+	// fmt.Printf("Disconnect leader %v\n", leader1)
 	cfg.checkOneLeader()
 
 	// if the old leader rejoins, that shouldn't
@@ -88,7 +88,7 @@ func TestBasicAgree(t *testing.T) {
 
 	iters := 3
 	for index := 1; index < iters+1; index++ {
-		fmt.Printf("nCommitted: checking whether some have committed before Start(), index: %v\n", index)
+		// fmt.Printf("nCommitted: checking whether some have committed before Start(), index: %v\n", index)
 		nd, _ := cfg.nCommitted(index)
 		if nd > 0 {
 			t.Fatalf("some have committed before Start()")
@@ -145,11 +145,11 @@ func TestFailNoAgree(t *testing.T) {
 
 	// 3 of 5 followers disconnect
 	leader := cfg.checkOneLeader()
-	fmt.Printf("leader selected: %v\n", leader)
+	// fmt.Printf("leader selected: %v\n", leader)
 	cfg.disconnect((leader + 1) % servers)
 	cfg.disconnect((leader + 2) % servers)
 	cfg.disconnect((leader + 3) % servers)
-	fmt.Printf("Disconnect peers %v, %v, %v\n", (leader + 1) % servers, (leader + 2) % servers, (leader + 3) % servers)
+	// fmt.Printf("Disconnect peers %v, %v, %v\n", (leader + 1) % servers, (leader + 2) % servers, (leader + 3) % servers)
 
 	index, _, ok := cfg.rafts[leader].Start(20)
 	if ok != true {
@@ -339,15 +339,19 @@ func TestBackup(t *testing.T) {
 	fmt.Printf("Test: leader backs up quickly over incorrect follower logs ...\n")
 
 	cfg.one(rand.Int(), servers)
+	// fmt.Printf("Yeah, agree on one.\n")
 
 	// put leader and one follower in a partition
 	leader1 := cfg.checkOneLeader()
 	cfg.disconnect((leader1 + 2) % servers)
 	cfg.disconnect((leader1 + 3) % servers)
 	cfg.disconnect((leader1 + 4) % servers)
+	// fmt.Printf("Leader is %v. Now DISCONNECT %v, %v, and %v.\n", leader1,
+	// (leader1 + 2) % servers, (leader1 + 3) % servers, (leader1 + 4) % servers)
 
 	// submit lots of commands that won't commit
 	for i := 0; i < 50; i++ {
+		// fmt.Printf("Submit %v\n", i)
 		cfg.rafts[leader1].Start(rand.Int())
 	}
 
@@ -355,15 +359,19 @@ func TestBackup(t *testing.T) {
 
 	cfg.disconnect((leader1 + 0) % servers)
 	cfg.disconnect((leader1 + 1) % servers)
+	// fmt.Printf("DISCONNECT %v, %v.\n", (leader1 + 0) % servers, (leader1 + 1) % servers)
 
 	// allow other partition to recover
 	cfg.connect((leader1 + 2) % servers)
 	cfg.connect((leader1 + 3) % servers)
 	cfg.connect((leader1 + 4) % servers)
+	// fmt.Printf("CONNECT %v, %v, and %v.\n", (leader1 + 2) % servers,
+		// (leader1 + 3) % servers, (leader1 + 4) % servers)
 
 	// lots of successful commands to new group.
 	for i := 0; i < 50; i++ {
 		cfg.one(rand.Int(), 3)
+		// fmt.Printf("Yeah, agree on the %v-th command.\n", i)
 	}
 
 	// now another partitioned leader and one follower
@@ -373,6 +381,7 @@ func TestBackup(t *testing.T) {
 		other = (leader2 + 1) % servers
 	}
 	cfg.disconnect(other)
+	// fmt.Printf("DISCONNECT %v. Now only two peers are alive.\n", other)
 
 	// lots more commands that won't commit
 	for i := 0; i < 50; i++ {
@@ -385,19 +394,24 @@ func TestBackup(t *testing.T) {
 	for i := 0; i < servers; i++ {
 		cfg.disconnect(i)
 	}
+	// fmt.Printf("DISCONNECT ALL!\n")
 	cfg.connect((leader1 + 0) % servers)
 	cfg.connect((leader1 + 1) % servers)
 	cfg.connect(other)
+	// fmt.Printf("CONNECT %v, %v, and %v.\n", (leader1 + 0) % servers, (leader1 + 1) % servers,
+		// other)
 
 	// lots of successful commands to new group.
 	for i := 0; i < 50; i++ {
 		cfg.one(rand.Int(), 3)
+		// fmt.Printf("Yeah (again), agree on the %v-th command.\n", i)
 	}
 
 	// now everyone
 	for i := 0; i < servers; i++ {
 		cfg.connect(i)
 	}
+	// fmt.Printf("CONNECT ALL!\n")
 	cfg.one(rand.Int(), servers)
 
 	fmt.Printf("  ... Passed\n")
