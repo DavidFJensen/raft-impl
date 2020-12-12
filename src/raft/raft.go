@@ -29,7 +29,7 @@ import (
 	"time"
 )
 
-const DEBUG = 0
+const DEBUG = 1
 
 // import "bytes"
 // import "encoding/gob"
@@ -251,8 +251,8 @@ func (rf *Raft) RequestVote(args RequestVoteArgs, reply *RequestVoteReply) {
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
 	defer rf.persist()
-	// rf.logger.Printf("Receive vote request from peer %v in term %v, my term is %v. Now my votedFor: %v.",
-	// 	args.CandidateId, args.Term, rf.currentTerm, rf.votedFor)
+	rf.logger.Printf("Receive vote request from peer %v in term %v, my term is %v. Now my votedFor: %v.",
+		args.CandidateId, args.Term, rf.currentTerm, rf.votedFor)
 	replyTerm := args.Term
 	if rf.currentTerm > args.Term {
 		replyTerm = rf.currentTerm
@@ -291,8 +291,8 @@ func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply)
 		rf.logger.Printf("Receive append entries %v from %v, leader's Term: %v, my Term: %v",
 			args.Entries, args.LeaderId, args.Term, rf.currentTerm)
 	} else {
-		// rf.logger.Printf("Receive heartbeat %v from %v, leader's Term: %v, my Term: %v",
-		// 	args.Entries, args.LeaderId, args.Term, rf.currentTerm)
+		rf.logger.Printf("Receive heartbeat %v from %v, leader's Term: %v, my Term: %v",
+			args.Entries, args.LeaderId, args.Term, rf.currentTerm)
 	}
 	rf.logger.Printf("args.PrevLogIndex: %v, args.PrevLogTerm: %v",
 		args.PrevLogIndex, args.PrevLogTerm)
@@ -359,7 +359,7 @@ func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply)
 				entry := args.Entries[i-args.PrevLogIndex-1]
 				rf.logs = append(rf.logs, LogEntry{entry.Term, entry.Value})
 			}
-			rf.logger.Printf("after updating, logs: %v", len(rf.logs))
+			rf.logger.Printf("after updating, logs: %v", rf.logs)
 		}
 		if reply.Success && args.LeaderCommit > rf.commitIndex {
 			rf.commitIndex = args.LeaderCommit
@@ -400,9 +400,9 @@ func (rf *Raft) sendRequestVote(server int, args RequestVoteArgs, reply *Request
 		}
 		if reply.VoteGranted {
 			rf.voteNum++
-			// rf.logger.Printf("get voted from %v! voteNum: %v", server, rf.voteNum)
+			rf.logger.Printf("get voted from %v! voteNum: %v", server, rf.voteNum)
 		} else {
-			// rf.logger.Printf("get unvoted from %v. voteNum: %v", server, rf.voteNum)
+			rf.logger.Printf("get unvoted from %v. voteNum: %v", server, rf.voteNum)
 		}
 		if rf.voteNum > len(rf.peers)/2 {
 			if rf.state != 2 {
@@ -693,13 +693,13 @@ func (rf *Raft) sendHeartBeat() {
 			args := AppendEntriesArgs{}
 			args.Term = rf.currentTerm
 			args.LeaderId = rf.me
-			args.PrevLogIndex = len(rf.logs) - 1
-			if len(rf.logs) > 0 {
-				args.PrevLogTerm = rf.logs[len(rf.logs)-1].Term
+			args.PrevLogIndex = rf.nextIndex[i] - 1
+			if args.PrevLogIndex >= 0 {
+				args.PrevLogTerm = rf.logs[args.PrevLogIndex].Term
 			}
 			args.LeaderCommit = rf.commitIndex
 			var reply AppendEntriesReply
-			// rf.logger.Printf("send heart beat to peer %v", i)
+			rf.logger.Printf("send heart beat to peer %v", i)
 			rf.mu.Unlock()
 			rf.sendAppendEntries(i, args, &reply)
 		}(i, rf)
