@@ -670,7 +670,7 @@ func TestFigure8(t *testing.T) {
 
 	nup := servers
 	for iters := 0; iters < 1000; iters++ {
-		fmt.Println(iters)
+		// fmt.Println(iters)
 		leader := -1
 		for i := 0; i < servers; i++ {
 			if cfg.rafts[i] != nil {
@@ -756,7 +756,7 @@ func TestFigure8Unreliable(t *testing.T) {
 
 	nup := servers
 	for iters := 0; iters < 1000; iters++ {
-		fmt.Println(iters)
+		// fmt.Println(iters)
 		if iters == 200 {
 			cfg.setlongreordering(true)
 		}
