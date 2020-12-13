@@ -635,6 +635,16 @@ func (rf *Raft) startElection() {
 	for i := range rf.voteSet {
 		rf.voteSet[i] = false
 	}
+	// safe to apply
+	if rf.commitIndex > rf.lastApplied {
+		for i := rf.lastApplied + 1; i <= rf.commitIndex; i++ {
+			applyMsg := ApplyMsg{}
+			applyMsg.Index = i + 1
+			applyMsg.Command = rf.logs[i].Value
+			rf.applyCh <- applyMsg
+		}
+		rf.lastApplied = rf.commitIndex
+	}
 	rf.logger.Println("start election.")
 	rf.state = 1 // change to candidate
 	rf.logger.Println("become a candidate.")
