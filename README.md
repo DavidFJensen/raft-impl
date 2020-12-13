@@ -1,4 +1,4 @@
-# NJU-DisSys-2020
+# Raft Implementation
 
 This is the course assignment for the course Distributed System, Fall 2020, CS@NJU.
 
@@ -18,4 +18,4 @@ $ go test
 
 ### Warning
 
-Plagiarism of this coursework is prohibited!
+Plagiarism of this coursework is prohibited. If any, I would report it to the teaching committee.
