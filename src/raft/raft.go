@@ -1,11 +1,11 @@
 /*
-	raft-impl: An implementation of the Raft consensus algorithm
-	Copyright (C) 2020 Yicheng Huang. All rights reserved.
+raft-impl: An implementation of the Raft consensus algorithm
+Copyright (C) 2020 Yicheng Huang. All rights reserved.
 
-	A course assignment for Distributed System, Fall 2020, CS@NJU.
+A course assignment for Distributed System, Fall 2020, CS@NJU.
 
-	raft.go
-	The core Raft implementation
+raft.go
+The core Raft implementation
 */
 package raft
 
@@ -13,12 +13,13 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
-	"labrpc"
 	"log"
 	"math/rand"
 	"os"
 	"sync"
 	"time"
+
+	"../labrpc"
 )
 
 /*=========================================
